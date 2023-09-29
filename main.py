@@ -19,7 +19,7 @@ EXT_NAME="Copy Request"
 
 class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 	def toString(self):
-		return EXT_NAME+" v" + VERSION
+		return EXT_NAME + " v" + VERSION
 
 	def registerExtenderCallbacks(self, callbacks):
 		callbacks.setExtensionName(EXT_NAME)
@@ -32,10 +32,12 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 		callbacks.registerContextMenuFactory(self)
 
 		# Load parsers
-		self.pythonParser = PythonParser(stdout, stderr)
-		self.javascriptParser = JavascriptParser(stdout, stderr)
+		self.pythonParser = PythonParser(callbacks)
+		self.javascriptParser = JavascriptParser(callbacks)
+		open("log.txt", "w").write("")
+		open("err.txt", "w").write("")
 
-		print(self.toString() + " loaded successfully!")
+		print("BurpExtender::registerExtenderCallbacks: " + self.toString() + " loaded successfully!")
 
 	def createMenuItems(self, invocation):
 		self.context = invocation
@@ -49,29 +51,37 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 		return menuList
 
 	def copyJS(self, event):
-		print("copyJS", str(event))
-		data = self.getRequestData()
+		data = self.getRequestsData()
 		self.javascriptParser.parse(data)
 
 	def copyPY(self, event):
-		print("copyPY", str(event))
-		data = self.getRequestData()
+		data = self.getRequestsData()
 		self.pythonParser.parse(data)
 
-	def getRequestData(self):
+	def getRequestsData(self):
 		# TODO: support multiple requests
-		http_traffic = self.context.getSelectedMessages()[0]
-		http_request = http_traffic.getRequest()
-		http_response = http_traffic.getResponse()
+		http_traffic = self.context.getSelectedMessages()
 
-		request_data = self.bytesToString(http_request)
-		response_data = self.bytesToString(http_response)
+		requests = []
+		for message in http_traffic:
+			http_request = http_traffic.getRequest()
+			http_response = http_traffic.getResponse()
+			url = http_traffic.getUrl()
 
-		print("request_data", request_data)
-		print("response_data", response_data)
-		return [request_data, response_data]
+			request_data = self.bytesToString(http_request)
+			response_data = self.bytesToString(http_response)
+
+			requests.append({
+				"request_data": request_data,
+				"response_data": response_data,
+				"url": url
+			})
+
+		return requests
 
 
 	def bytesToString(self, data):
+		if data is None:
+			return None
 		data = self.helpers.bytesToString(data).replace('\r\n', '\n')
 		return data
