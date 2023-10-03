@@ -7,8 +7,6 @@ class PythonParser(Parser):
 		self.callbacks = callbacks
 		self.stdout = PrintWriter(callbacks.getStdout(), True)
 		self.stderr = PrintWriter(callbacks.getStderr(), True)
-		if DEBUG:
-			print('PythonParser::__init__: Initialized')
 
 	def parse(self, data):
 		self.request_data = data['request_data']
@@ -16,8 +14,5 @@ class PythonParser(Parser):
 		# Currently response data is not used. May be None
 		# TODO: Add comments in the generated code where needed to provide example response 
 		self.response_data = data['response_data']
-
-
-		request_headers = self.getHeaders(self.request_data)
 		
 

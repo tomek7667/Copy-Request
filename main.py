@@ -34,8 +34,6 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 		# Load parsers
 		self.pythonParser = PythonParser(callbacks)
 		self.javascriptParser = JavascriptParser(callbacks)
-		open("log.txt", "w").write("")
-		open("err.txt", "w").write("")
 
 		print("BurpExtender::registerExtenderCallbacks: " + self.toString() + " loaded successfully!")
 
@@ -59,14 +57,13 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 		self.pythonParser.parse(data)
 
 	def getRequestsData(self):
-		# TODO: support multiple requests
 		http_traffic = self.context.getSelectedMessages()
 
 		requests = []
 		for message in http_traffic:
-			http_request = http_traffic.getRequest()
-			http_response = http_traffic.getResponse()
-			url = http_traffic.getUrl()
+			http_request = message.getRequest()
+			http_response = message.getResponse()
+			url = message.getUrl()
 
 			request_data = self.bytesToString(http_request)
 			response_data = self.bytesToString(http_response)
