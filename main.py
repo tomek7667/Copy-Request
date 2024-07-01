@@ -14,7 +14,7 @@ import threading
 import time
 import re
 
-VERSION="0.0.0"
+VERSION="1.0.0"
 EXT_NAME="Copy Request"
 
 class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
@@ -82,3 +82,4 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 			return None
 		data = self.helpers.bytesToString(data).replace('\r\n', '\n')
 		return data
+

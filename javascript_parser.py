@@ -120,3 +120,4 @@ class JavascriptParser(Parser):
 		variable_name = 'url_' + self.randomString() + '_' + str(request_number)
 		variable_value = str(url)
 		return [variable_name + ' = `' + variable_value + '`;', variable_name]
+
