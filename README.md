@@ -32,6 +32,7 @@ If you have any issues installing/using the extension, please open a new issue a
     - [ ] POST request with Content-Type `multipart/form-data` that will support selecting a file at `"<path_to_file>"`. In JS via `new FormData()`
     - [ ] Commented generated code, commented loop with the request with example array or loaded from a file wordlist
     - [ ] Some unit tests that verify the parsing process with different scenarios
+    - [ ] CI pipeline that runs the unit tests.
 - Python
     - [ ] Same roadmap as for JS. Will be filled when JS roadmap is finished.
 
