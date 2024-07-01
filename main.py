@@ -43,7 +43,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 
 		menuList.add(JMenuItem("as javascript fetch",
 				actionPerformed=self.copyJS))
-		menuList.add(JMenuItem("as python requests",
+		menuList.add(JMenuItem("as python requests (Not yet)",
 				actionPerformed=self.copyPY))
 
 		return menuList

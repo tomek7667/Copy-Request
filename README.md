@@ -1,1 +1,36 @@
 # Copy-Request
+
+Copy your request from Burp to its programmatic equivalent in chosen language.
+
+The extension is currently in development so only manual installation is possible rather than from the BApp store, as this requires [some extensive process](https://portswigger.net/burp/documentation/desktop/extensions/creating/bapp-store-submitting-extensions) to get it deployed there, and further updates are pretty painful.
+
+## Manual Installation
+
+0. Ensure that you have `jython` in burp settings in `Python environment` section selected. If you don', follow [burp Installing Jython or JRuby](https://portswigger.net/burp/documentation/desktop/extensions/installing-extensions) tutorial. 
+1. Clone the repository: `git clone https://github.com/tomek7667/Copy-Request.git`
+2. Obtain path to the `main.py` file: `<current working director>/Copy-Request/main.py`
+3. Open `Extensions` tab in Burp, and hit `Add` button. 
+4. Choose `Extension type` to be `Python`
+5. Paste the path from `step 2.` into `Extension file` field and click `Next`.
+
+If everything succeeded, you should be able to Right-Click any **request** in burp and click `Extensions > Copy Request > as <language>` button. It will result in the generated code being loaded to your clipboard.
+
+## Supported languages
+
+- [x] JS 
+- [ ] Python
+
+## Roadmap 
+
+- [x] Copy GET/HEAD requests
+- JS 
+    - [x] Copied request is a separate function that is called in main function asynchronously
+    - [x] POST request with Content-Type: `application/json`
+    - [x] Variable'ized cookie, url and body of a request
+    - [x] POST request with Content-Type `application/x-www-form-urlencoded`
+    - [ ] POST request with Content-Type `multipart/form-data` that will support selecting a file at `"<path_to_file>"`. In JS via `new FormData()`
+    - [ ] Commented generated code, commented loop with the request with example array or loaded from a file wordlist
+    - [ ] Some unit tests that verify the parsing process with different scenarios
+- Python
+    - [ ] Same roadmap as for JS. Will be filled when JS roadmap is finished.
+
