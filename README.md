@@ -14,6 +14,7 @@ The extension is currently in development so only manual installation is possibl
 5. Paste the path from `step 2.` into `Extension file` field and click `Next`.
 
 If everything succeeded, you should be able to Right-Click any **request** in burp and click `Extensions > Copy Request > as <language>` button. It will result in the generated code being loaded to your clipboard.
+If you have any issues installing/using the extension, please open a new issue and try to describe your issue as accurately and reproducibly as possible. I would love to make the extension most usable and comfortable for you. Also if you found anything in the README that is not clear enough feel free to open new issue and I will try to address it to best of my abillity.
 
 ## Supported languages
 
@@ -33,4 +34,6 @@ If everything succeeded, you should be able to Right-Click any **request** in bu
     - [ ] Some unit tests that verify the parsing process with different scenarios
 - Python
     - [ ] Same roadmap as for JS. Will be filled when JS roadmap is finished.
+
+If you have any ideas or improvements that you would like to see in the extension, please open a new issue and I would love to implement it!
 
