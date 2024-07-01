@@ -24,13 +24,14 @@ If you have any issues installing/using the extension, please open a new issue a
 ## Roadmap 
 
 - [x] Copy GET/HEAD requests
+- [ ] Refactor code to construct an abstract structure that will descripe the request, like the forms etc. Then just pass the abstract structure to different parsers that will generate the code needed to call the requests.
 - JS 
     - [x] Copied request is a separate function that is called in main function asynchronously
     - [x] POST request with Content-Type: `application/json`
     - [x] Variable'ized cookie, url and body of a request
     - [x] POST request with Content-Type `application/x-www-form-urlencoded`
-    - [ ] POST request with Content-Type `multipart/form-data` that will support selecting a file at `"<path_to_file>"`. In JS via `new FormData()`
-    - [ ] Commented generated code, commented loop with the request with example array or loaded from a file wordlist
+    - [x] POST request with Content-Type `multipart/form-data` that will support selecting a file at `"<path_to_file>"`. In JS via `new FormData()`
+    - [x] Commented generated code, commented loop with the request with example array or loaded from a file wordlist
     - [ ] Some unit tests that verify the parsing process with different scenarios
     - [ ] CI pipeline that runs the unit tests.
 - Python

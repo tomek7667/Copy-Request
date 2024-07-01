@@ -17,9 +17,11 @@ import re
 VERSION="1.0.0"
 EXT_NAME="Copy Request"
 
+
 class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 	def toString(self):
 		return EXT_NAME + " v" + VERSION
+
 
 	def registerExtenderCallbacks(self, callbacks):
 		callbacks.setExtensionName(EXT_NAME)
@@ -37,24 +39,28 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 
 		print("BurpExtender::registerExtenderCallbacks: " + self.toString() + " loaded successfully!")
 
+
 	def createMenuItems(self, invocation):
 		self.context = invocation
-		menuList = ArrayList()
+		menu_list = ArrayList()
 
-		menuList.add(JMenuItem("as javascript fetch",
-				actionPerformed=self.copyJS))
-		menuList.add(JMenuItem("as python requests (Not yet)",
-				actionPerformed=self.copyPY))
+		menu_list.add(JMenuItem("as javascript fetch",
+				actionPerformed=self.copy_javascript))
+		menu_list.add(JMenuItem("as python requests (Not yet)",
+				actionPerformed=self.copy_python))
 
-		return menuList
+		return menu_list
 
-	def copyJS(self, event):
+
+	def copy_javascript(self, event):
 		data = self.getRequestsData()
 		self.javascriptParser.parse(data)
 
-	def copyPY(self, event):
+
+	def copy_python(self, event):
 		data = self.getRequestsData()
 		self.pythonParser.parse(data)
+
 
 	def getRequestsData(self):
 		http_traffic = self.context.getSelectedMessages()

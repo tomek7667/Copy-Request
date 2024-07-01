@@ -10,7 +10,7 @@ import string
 from common import *
 
 class Parser:
-	def getFirstHeaderInfo(self, raw_data):
+	def get_first_header_info(self, raw_data):
 		record = raw_data.split('\n\n')[0].split('\n')[0]
 		[method, _, version] = record.split(' ')
 		return {
@@ -18,13 +18,13 @@ class Parser:
 			'version': version
 		}
 
-	def randomString(self, length=4):
+	def random_string(self, length=4):
 		return ''.join(random.choice(string.ascii_letters) for _ in range(length))
 
-	def copyClipboard(self, data):
-		systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard()
-		transferText = StringSelection(data)
-		systemClipboard.setContents(transferText, None)
+	def copy_clipboard(self, data):
+		system_clipboard = Toolkit.getDefaultToolkit().getSystemClipboard()
+		transfer_text = StringSelection(data)
+		system_clipboard.setContents(transfer_text, None)
 		if Toolkit.getDefaultToolkit().getSystemSelection() is not None:
-			systemSelection = Toolkit.getDefaultToolkit().getSystemSelection()
-			systemSelection.setContents(transferText, None)
+			system_selection = Toolkit.getDefaultToolkit().getSystemSelection()
+			system_selection.setContents(transfer_text, None)
