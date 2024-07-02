@@ -20,6 +20,7 @@ If you have any issues installing/using the extension, please open a new issue a
 
 - [x] JS 
 - [ ] Python
+- [ ] Go
 
 ## Roadmap 
 
