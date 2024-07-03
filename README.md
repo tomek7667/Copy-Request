@@ -35,8 +35,51 @@ If you have any issues installing/using the extension, please open a new issue a
     - [x] Commented generated code, commented loop with the request with example array or loaded from a file wordlist
     - [ ] Some unit tests that verify the parsing process with different scenarios
     - [ ] CI pipeline that runs the unit tests.
-- Python
+- Python/Go
     - [ ] Same roadmap as for JS. Will be filled when JS roadmap is finished.
 
 If you have any ideas or improvements that you would like to see in the extension, please open a new issue and I would love to implement it!
+
+### Refactor object
+
+Second point in roadmap example abstract object for parsers:
+
+```json
+{
+    "general": {
+        "method": "GET",
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "Authorization": "Bearer abc",
+        "httpVersion": "1.1",
+        "url": {
+            "raw": "https://example.com/abc/def?param1=value1",
+            "parameters": {
+                "param1": "value1"
+            },
+            "path": "/abc/def",
+            "protocol": "https",
+            "domain": "example.com"
+        }
+    },
+    "application/json": {
+        "param1": "value1"
+    },
+    "application/x-www-form-urlencoded": {
+        "param1": "value1"
+    },
+    "multipart/form-data": {
+        "param1": "value1"
+    },
+    "files": [
+        {
+            "for": "file",
+            "filename": "bump.js",
+            "contentType": "application/json",
+            "data": "base64_data"
+        }
+    ]
+}
+```
 
