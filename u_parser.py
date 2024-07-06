@@ -7,7 +7,6 @@ from java.awt.datatransfer import StringSelection
 from javax.swing import JOptionPane
 import random
 import string
-from common import *
 
 class Parser:
 	def get_first_header_info(self, raw_data):
@@ -18,8 +17,10 @@ class Parser:
 			'version': version
 		}
 
+
 	def random_string(self, length=4):
 		return ''.join(random.choice(string.ascii_letters) for _ in range(length))
+
 
 	def copy_clipboard(self, data):
 		system_clipboard = Toolkit.getDefaultToolkit().getSystemClipboard()
@@ -28,3 +29,4 @@ class Parser:
 		if Toolkit.getDefaultToolkit().getSystemSelection() is not None:
 			system_selection = Toolkit.getDefaultToolkit().getSystemSelection()
 			system_selection.setContents(transfer_text, None)
+

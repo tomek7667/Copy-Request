@@ -60,7 +60,8 @@ Second point in roadmap example abstract object for parsers:
             },
             "path": "/abc/def",
             "protocol": "https",
-            "domain": "example.com"
+            "domain": "example.com",
+            "port": 443
         }
     },
     "application/json": {

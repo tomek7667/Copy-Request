@@ -14,6 +14,8 @@ import threading
 import time
 import re
 
+from request_tree import RequestTree
+
 VERSION="1.0.0"
 EXT_NAME="Copy Request"
 
@@ -48,8 +50,15 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 				actionPerformed=self.copy_javascript))
 		menu_list.add(JMenuItem("as python requests (Not yet)",
 				actionPerformed=self.copy_python))
+		menu_list.add(JMenuItem("as javascript fetch (new)",
+				actionPerformed=self.copy_js_2))
 
 		return menu_list
+
+	def copy_js_2(self, event):
+		requests = self.getRequestsData()
+		for request in requests:
+			rt = RequestTree(request, self.callbacks)
 
 
 	def copy_javascript(self, event):
