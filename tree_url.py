@@ -15,7 +15,11 @@ class TreeUrl:
 		parameters = {}
 		params = query.split("&")
 		for param in params:
-			key, value = param.split("=")
+			param_split = param.split("=")
+			key = param_split[0]
+			value = "=".join(
+				param_split[1:]
+			)
 			parameters[key] = value
 		return parameters
 
