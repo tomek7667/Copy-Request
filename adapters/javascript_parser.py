@@ -59,7 +59,19 @@ class JavascriptParser(Parser):
 
 		self.imports = ""
 		self.functions = [self._get_function_code(request_trees[i], i + 1) for i in range(len(request_trees))]
-		self.main = ""
+		self.main = """
+const main = async () => {
+	// const wordlist = fs.readFilesync("rockyou.txt", "utf-8").split("\n")
+	// const len = wordlist.length;
+	// for (const i = 0; i < len; i++) {\n"""
+		for i in range(len(functions)):
+			self.main += "\tawait request_" + str(i) + "();\n"
+
+
+		self.main += """
+	// }
+}
+"""
 		
 		code = IMPORTS + "\n\n" + UTILS + "\n\n" + "\n".join(self.functions) + "\n\n" + self.main
 		print(1)
