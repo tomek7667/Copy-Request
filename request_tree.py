@@ -12,6 +12,7 @@ class RequestTree:
 		content_type = self.general.headers["Content-Type"] if "Content-Type" in self.general.headers else None
 		if content_type is not None and "multipart/form-data" in content_type:
 			content_type = "multipart/form-data"
+			self.general.headers["Content-Type"] = content_type
 
 		self.application_json = None
 		self.application_x_www_form_urlencoded = None
@@ -89,7 +90,7 @@ class RequestTree:
 		encoded = str(s)
 		result = ""
 		i = 0
-		while i < len(encoded) - 2:
+		while i < len(encoded):
 			c = encoded[i]
 			if c == '%':
 				url_value = int(
@@ -112,4 +113,8 @@ class RequestTree:
 			"multipart/form-data": self.multipart_form_data,
 			"files": self.files
 		}, indent=4)
+
+
+	def __repr__(self):
+		return self.to_json()
 

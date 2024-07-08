@@ -25,7 +25,7 @@ If you have any issues installing/using the extension, please open a new issue a
 ## Roadmap 
 
 - [x] Copy GET/HEAD requests
-- [ ] Refactor code to construct an abstract structure that will descripe the request, like the forms etc. Then just pass the abstract structure to different parsers that will generate the code needed to call the requests.
+- [x] Refactor code to construct an abstract structure that will descripe the request, like the forms etc. Then just pass the abstract structure to different parsers that will generate the code needed to call the requests.
 - JS 
     - [x] Copied request is a separate function that is called in main function asynchronously
     - [x] POST request with Content-Type: `application/json`
@@ -35,6 +35,7 @@ If you have any issues installing/using the extension, please open a new issue a
     - [x] Commented generated code, commented loop with the request with example array or loaded from a file wordlist
     - [ ] Some unit tests that verify the parsing process with different scenarios
     - [ ] CI pipeline that runs the unit tests.
+    - [ ] Add optional headers filtering
 - Python/Go
     - [ ] Same roadmap as for JS. Will be filled when JS roadmap is finished.
 
@@ -62,6 +63,9 @@ Second point in roadmap example abstract object for parsers:
             "protocol": "https",
             "domain": "example.com",
             "port": 443
+        },
+        "cookies": {
+            "key": "value"
         }
     },
     "application/json": {
@@ -83,4 +87,20 @@ Second point in roadmap example abstract object for parsers:
     ]
 }
 ```
+
+### Notes
+
+Features in code:
+
+- arguments to generated functions have default values of:
+    - Cookies as one argument as dict: `{ "a": "1", "b": "2" }`
+    - Authorization value *(only after `=`)*
+    - Body as one argument as dict: `{ "a": "1", "b": "2" }`
+    - Url as a dict constructed from: `{ "parameters": { "a": "b"}, "path": "/a/b/", "protocol": "https", "domain": "example.com", "port": 443 }`
+    - Method as a string: `"GET"`
+    - *files to be considered*
+- when `multipart/form-data` trim Content-Type from headers, files are not passed through the arguments, but already in the function, as `atob` and in the comment the `fs.readFileSync`.
+- imports at the beginning of the file
+- interpolating all values
+- add utility function/s (e.g. construct url)
 

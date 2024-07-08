@@ -16,12 +16,33 @@ class TreeUrl:
 		params = query.split("&")
 		for param in params:
 			param_split = param.split("=")
-			key = param_split[0]
-			value = "=".join(
-				param_split[1:]
+			key = self._url_decode(param_split[0])
+			value = self._url_decode(
+				"=".join(
+					param_split[1:]
+				)
 			)
 			parameters[key] = value
 		return parameters
+
+
+	def _url_decode(self, s):
+		encoded = str(s)
+		result = ""
+		i = 0
+		while i < len(encoded):
+			c = encoded[i]
+			if c == '%':
+				url_value = int(
+					encoded[i+1:i+3],
+					16
+				)
+				result += chr(url_value)
+				i += 3
+			else:
+				result += c
+				i += 1
+		return result
 
 
 	def to_json(self):

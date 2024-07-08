@@ -1,6 +1,6 @@
 from burp import IBurpExtender, IContextMenuFactory, IHttpRequestResponse
+from adapters.javascript_parser import JavascriptParser
 from python_parser import PythonParser
-from javascript_parser import JavascriptParser
 from java.io import PrintWriter
 from java.util import ArrayList
 from javax.swing import JMenuItem
@@ -37,7 +37,6 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 
 		# Load parsers
 		self.pythonParser = PythonParser(callbacks)
-		self.javascriptParser = JavascriptParser(callbacks)
 
 		print("BurpExtender::registerExtenderCallbacks: " + self.toString() + " loaded successfully!")
 
@@ -47,24 +46,21 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 		menu_list = ArrayList()
 
 		menu_list.add(JMenuItem("as javascript fetch",
-				actionPerformed=self.copy_javascript))
+				actionPerformed=self.copy_js))
 		menu_list.add(JMenuItem("as python requests (Not yet)",
 				actionPerformed=self.copy_python))
-		menu_list.add(JMenuItem("as javascript fetch (new)",
-				actionPerformed=self.copy_js_2))
 
 		return menu_list
 
-	def copy_js_2(self, event):
+	def copy_js(self, event):
 		requests = self.getRequestsData()
+		request_trees = []
 		for request in requests:
 			rt = RequestTree(request, self.callbacks)
+			request_trees.append(rt)
+		JavascriptParser(request_trees, self.callbacks)
 
-
-	def copy_javascript(self, event):
-		data = self.getRequestsData()
-		self.javascriptParser.parse(data)
-
+ 
 
 	def copy_python(self, event):
 		data = self.getRequestsData()

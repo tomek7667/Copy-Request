@@ -8,6 +8,7 @@ class TreeGeneral:
 		self.headers = self._get_headers(rd)
 		self.Authorization = self._get_authorization(self.headers)
 		self.httpVersion = self._get_http_version(rd)
+		self.cookies = self._get_cookies(self.headers)
 		self.url = TreeUrl(url)
 
 
@@ -35,12 +36,29 @@ class TreeGeneral:
 		return headers["Authorization"] if "Authorization" in headers else None
 
 
+	def _get_cookies(self, headers):
+		if "Cookie" not in headers:
+			return None
+		else:
+			cookies_raw = headers["Cookie"]
+			_cookies = {}
+			for cookie in cookies_raw.split(";"):
+				cookie = cookie.strip()
+				if len(cookie) == 0:
+					continue
+				cookie_name = cookie.split("=")[0]
+				cookie_value = "=".join(cookie.split("=")[1:])
+				_cookies[cookie_name] = cookie_value
+			return _cookies
+
+
 	def to_json(self):
 		return {
 			"method": self.method,
 			"headers": self.headers,
 			"Authorization": self.Authorization,
 			"httpVersion": self.httpVersion,
+			"cookies": self.cookies,
 			"url": self.url.to_json()
 		}
 
