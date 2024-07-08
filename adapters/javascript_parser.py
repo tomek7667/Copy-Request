@@ -3,6 +3,53 @@ from java.io import PrintWriter
 from request_tree import RequestTree
 from u_parser import Parser
 
+IMPORTS = """
+const fs = require("fs");
+"""[1:-1]
+
+UTILS = """
+const constructUrl = ({
+	parameters,
+	path,
+	protocol,
+	domain,
+	port,
+}) => {
+	const urlSearchParams = new URLSearchParams();
+	for (const key in parameters) {
+		const value = parameters[key];
+		urlSearchParams.set(key, value);
+	}
+	const parametersStr = urlSearchParams.toString();
+	if (parametersStr === "") {
+		return `${protocol}://${domain}:${port}${path}`;
+	} else {
+		return `${protocol}://${domain}:${port}${path}?${parametersStr}`;
+	}
+}
+
+const constructCookies = (cookieObject) => {
+	const cookiesArr = [];
+	for (const cookieName in cookieObject) {
+		const cookieValue = cookieObject[cookieName];
+		cookiesArr.push(`${cookieName}=${cookieValue}`);
+	}
+	const stringifiedCookies = cookiesArr.join("; ");
+	return stringifiedCookies;
+}
+
+const constructXWwwFormUrlencoded = (bodyObject) => {
+	const formBody = {};
+	for (const property in bodyObject) {
+		const encodedKey = encodeURIComponent(property);
+		const encodedValue = encodeURIComponent(bodyObject[property]);
+		const joined = `${encodedKey}=${encodedValue}`;
+		formBody.push(joined);
+	}
+	const stringifiedBody = formBody.join("&");
+	return stringifiedBody;
+}
+"""[1:-1]
 
 class JavascriptParser(Parser):
 	def __init__(self, request_trees, callbacks):
@@ -13,6 +60,13 @@ class JavascriptParser(Parser):
 		self.imports = ""
 		self.functions = [self._get_function_code(request_trees[i], i + 1) for i in range(len(request_trees))]
 		self.main = ""
+		
+		code = IMPORTS + "\n\n" + UTILS + "\n\n" + "\n".join(self.functions) + "\n\n" + self.main
+		print(1)
+		print(code)
+		print(2)
+		self.copy_clipboard(code)
+
 
 	
 	def _get_function_code(self, request_tree, i):
@@ -29,38 +83,22 @@ class JavascriptParser(Parser):
 			"port": request_tree.general.url.port
 		}
 		arg_method = request_tree.general.method
-		# func arguments
-		code += "\turlObject: " + json.dumps(arg_url) + ",\n"
-		code += "\tmethod: \"" + arg_method + "\",\n"
+		code += "\turlObject = " + json.dumps(arg_url) + ",\n"
+		code += "\tmethod = \"" + arg_method + "\",\n"
 		if arg_cookie is not None:
-			code += "\tcookies: " + json.dumps(arg_cookie) + ",\n"
+			code += "\tcookies = " + json.dumps(arg_cookie) + ",\n"
 		if arg_authorization is not None:
-			code += "\tauthorization: \"" + arg_authorization + "\",\n"
+			code += "\tauthorization = \"" + arg_authorization + "\",\n"
 		if arg_body is not None:
-			code += "\tbody: " + json.dumps(arg_body) + ",\n"
+			code += "\tbody = " + json.dumps(arg_body) + ",\n"
 		code += "}) => {\n"
 		code += "\tconst url = constructUrl(urlObject);\n"
 		if arg_cookie is not None:
-			# TODO: refactor to be a utils functions at the top, just called here later. Similarly with url form and multipart.
-			code += "\tconst cookiesArr = [];\n"
-			code += "\tfor (const cookieName in cookies) {\n"
-			code += "\t\tconst cookieValue = cookies[cookieName];\n"
-			code += "\t\tcookiesArr.push(`${cookieName}=${cookieValue}`);\n"
-			code += "\t}\n"
-			code += "\tconst stringifiedCookies = cookiesArr.join(\"; \");\n"
+			code += "\tconst stringifiedCookies = constructCookies(cookies);\n"
 		if request_tree.application_json is not None:
-			code += "\tconst body = " + json.dumps(arg_body) + ";\n"
+			pass
 		elif request_tree.application_x_www_form_urlencoded is not None:
-			# TODO: url encode etc.
-			code += "\tconst body = " + json.dumps(arg_body) + ";\n"
-			code += "\tconst formBody = [];\n"
-			code += "\tfor (const property in body) {\n"
-			code += "\t\tconst encodedKey = encodeURIComponent(property);\n"
-			code += "\t\tconst encodedValue = encodeURIComponent(body[property]);\n"
-			code += "\t\tconst joined = `${encodedKey}=${encodedValue}`;\n"
-			code += "\t\tformBody.push(joined);\n"
-			code += "\t};\n"
-			code += "const stringifiedBody = formBody.join(\"&\");\n"
+			code += "\tconst stringifiedBody = constructXWwwFormUrlencoded(body);"
 			pass
 		elif request_tree.multipart_form_data is not None:
 			raise Exception("not implemented yet")
@@ -74,11 +112,19 @@ class JavascriptParser(Parser):
 			# TODO
 			pass
 		elif request_tree.application_json is not None:
-			# TODO
-			pass
+			code += "\t\t\tbody: JSON.stringify(body),\n"
+			code += "\t\t}\n"
+			code += "\t);\n"
+			code += "\tconst data = await response.json();\n"
+			code += "\t// const data = await response.text();\n"
+			code += "\treturn data;\n"
 		elif request_tree.application_x_www_form_urlencoded is not None:
-			# TODO:
-			pass
+			code += "\t\t\tbody: stringifiedBody,\n"
+			code += "\t\t}\n"
+			code += "\t);\n"
+			code += "\t// const data = await response.json();\n"
+			code += "\tconst data = await response.text();\n"
+			code += "\treturn data;\n"
 		else:
 			_headers_str = json.dumps(request_tree.general.headers)
 			code += "\t\t\theaders: {\n"
@@ -89,13 +135,11 @@ class JavascriptParser(Parser):
 				_authorization_str = request_tree.general.headers["Authorization"].split(" ")[0]
 				code += "\t\t\t\tAuthorization: `" + _authorization_str + " ${authorization}`,\n"
 			code += "\t});\n"
-		# code += "\t\t\t"
-		# code += "\t\t\t"
-
+			code += "\t// const data = await response.json();\n"
+			code += "\tconst data = await response.text();\n"
+			code += "\treturn data;\n"
 		code += "}\n"
-		print("!!!current func code:")
-		print(code)
-		print("!!!end code")
+		return code
 
 
 	def _extract_body(self, request_tree):
