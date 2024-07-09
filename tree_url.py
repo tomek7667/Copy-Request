@@ -15,6 +15,8 @@ class TreeUrl:
 		parameters = {}
 		params = query.split("&")
 		for param in params:
+			if param.strip() == "":
+				continue
 			param_split = param.split("=")
 			key = self._url_decode(param_split[0])
 			value = self._url_decode(

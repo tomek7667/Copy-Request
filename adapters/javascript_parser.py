@@ -61,16 +61,20 @@ class JavascriptParser(Parser):
 		self.functions = [self._get_function_code(request_trees[i], i + 1) for i in range(len(request_trees))]
 		self.main = """
 const main = async () => {
-	// const wordlist = fs.readFilesync("rockyou.txt", "utf-8").split("\n")
+	// const wordlist = fs.readFilesync("rockyou.txt", "utf-8").split("\\n")
 	// const len = wordlist.length;
 	// for (const i = 0; i < len; i++) {\n"""
-		for i in range(len(functions)):
-			self.main += "\tawait request_" + str(i) + "();\n"
+		for i in range(len(self.functions)):
+			self.main += "\tawait request_" + str(i + 1) + "();\n"
 
 
 		self.main += """
 	// }
 }
+
+(() => {
+	main()
+})();
 """
 		
 		code = IMPORTS + "\n\n" + UTILS + "\n\n" + "\n".join(self.functions) + "\n\n" + self.main
@@ -81,7 +85,7 @@ const main = async () => {
 
 
 	
-	def _get_function_code(self, request_tree, i):
+	def _get_function_code(self, request_tree: RequestTree, i):
 		code = "const request_" + str(i) + " = async ({\n"
 		# Args
 		arg_cookie = request_tree.general.cookies
@@ -95,8 +99,10 @@ const main = async () => {
 			"port": request_tree.general.url.port
 		}
 		arg_method = request_tree.general.method
+		arg_headers = request_tree.general.headers
 		code += "\turlObject = " + json.dumps(arg_url) + ",\n"
 		code += "\tmethod = \"" + arg_method + "\",\n"
+		code += "\theaders = " + json.dumps(arg_headers) + ",\n"
 		if arg_cookie is not None:
 			code += "\tcookies = " + json.dumps(arg_cookie) + ",\n"
 		if arg_authorization is not None:
@@ -125,6 +131,13 @@ const main = async () => {
 			pass
 		elif request_tree.application_json is not None:
 			code += "\t\t\tbody: JSON.stringify(body),\n"
+			code += "\t\t\theaders: {\n"
+			code += "\t\t\t\t...headers,\n"
+			if arg_authorization is not None:
+				code += "\t\t\t\tAuthorization: authorization,\n"
+			if arg_cookie is not None:
+				code += "\t\t\t\tCookie: stringifiedCookies,\n" 
+			code += "\t\t\t}\n"
 			code += "\t\t}\n"
 			code += "\t);\n"
 			code += "\tconst data = await response.json();\n"
@@ -132,21 +145,28 @@ const main = async () => {
 			code += "\treturn data;\n"
 		elif request_tree.application_x_www_form_urlencoded is not None:
 			code += "\t\t\tbody: stringifiedBody,\n"
+			code += "\t\t\theaders: {\n"
+			code += "\t\t\t\t...headers,\n"
+			if arg_authorization is not None:
+				code += "\t\t\t\tAuthorization: authorization,\n"
+			if arg_cookie is not None:
+				code += "\t\t\t\tCookie: stringifiedCookies,\n" 
+			code += "\t\t\t}\n"
 			code += "\t\t}\n"
 			code += "\t);\n"
 			code += "\t// const data = await response.json();\n"
 			code += "\tconst data = await response.text();\n"
 			code += "\treturn data;\n"
 		else:
-			_headers_str = json.dumps(request_tree.general.headers)
 			code += "\t\t\theaders: {\n"
-			code += "\t\t\t\t..." + _headers_str + ",\n"
-			if arg_cookie is not None:
-				code += "\t\t\tCookie: stringifiedCookies,\n"
+			code += "\t\t\t\t...headers,\n"
 			if arg_authorization is not None:
-				_authorization_str = request_tree.general.headers["Authorization"].split(" ")[0]
-				code += "\t\t\t\tAuthorization: `" + _authorization_str + " ${authorization}`,\n"
-			code += "\t});\n"
+				code += "\t\t\t\tAuthorization: authorization,\n"
+			if arg_cookie is not None:
+				code += "\t\t\t\tCookie: stringifiedCookies,\n" 
+			code += "\t\t\t}\n"
+			code += "\t\t}\n"
+			code += "\t);\n"
 			code += "\t// const data = await response.json();\n"
 			code += "\tconst data = await response.text();\n"
 			code += "\treturn data;\n"
