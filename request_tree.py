@@ -70,7 +70,7 @@ class RequestTree:
 						"filename": _file_name,
 						"contentType": _file_content_type,
 						"data": base64.b64encode(
-							value.encode()
+							value.encode("utf-8"),
 						).decode()
 					}
 					self.files.append(_file)

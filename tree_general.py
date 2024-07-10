@@ -3,7 +3,7 @@ from tree_url import TreeUrl
 
 class TreeGeneral:
 	def __init__(self, request_data, url):
-		rd = str(request_data).split("\n")
+		rd = request_data.split(u"\n")
 		self.method = self._get_method(rd)
 		self.headers = self._get_headers(rd)
 		self.Authorization = self._get_authorization(self.headers)
@@ -13,41 +13,41 @@ class TreeGeneral:
 
 
 	def _get_method(self, rd):
-		return rd[0].split(" ")[0]
+		return str(rd[0].split(u" ")[0])
 
 	
 	def _get_http_version(self, rd):
-		return rd[0].split("/")[-1]
+		return str(rd[0].split(u"/")[-1])
 
 
 	def _get_headers(self, rd):
 		headers = {}
-		headers_raw = "\n".join(rd[1:]).split("\n\n")[0]
-		for header_line in headers_raw.split("\n"):
-			header_name = header_line.split(":")[0].strip()
-			header_value = ":".join(
-				header_line.split(":")[1:]
+		headers_raw = u"\n".join(rd[1:]).split(u"\n\n")[0]
+		for header_line in headers_raw.split(u"\n"):
+			header_name = header_line.split(u":")[0].strip()
+			header_value = u":".join(
+				header_line.split(u":")[1:]
 			).strip()
 			headers[header_name] = header_value
 		return headers
 
 
 	def _get_authorization(self, headers):
-		return headers["Authorization"] if "Authorization" in headers else None
+		return headers[u"Authorization"] if u"Authorization" in headers else None
 
 
 	def _get_cookies(self, headers):
-		if "Cookie" not in headers:
+		if u"Cookie" not in headers:
 			return None
 		else:
-			cookies_raw = headers["Cookie"]
+			cookies_raw = headers[u"Cookie"]
 			_cookies = {}
-			for cookie in cookies_raw.split(";"):
+			for cookie in cookies_raw.split(u";"):
 				cookie = cookie.strip()
 				if len(cookie) == 0:
 					continue
-				cookie_name = cookie.split("=")[0]
-				cookie_value = "=".join(cookie.split("=")[1:])
+				cookie_name = cookie.split(u"=")[0]
+				cookie_value = u"=".join(cookie.split(u"=")[1:])
 				_cookies[cookie_name] = cookie_value
 			return _cookies
 
