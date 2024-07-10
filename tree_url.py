@@ -12,6 +12,8 @@ class TreeUrl:
 
 
 	def _get_parameters(self, query):
+		if query == "None":
+			return {}
 		parameters = {}
 		params = query.split("&")
 		for param in params:

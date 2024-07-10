@@ -39,7 +39,7 @@ const constructCookies = (cookieObject) => {
 }
 
 const constructXWwwFormUrlencoded = (bodyObject) => {
-	const formBody = {};
+	const formBody = [];
 	for (const property in bodyObject) {
 		const encodedKey = encodeURIComponent(property);
 		const encodedValue = encodeURIComponent(bodyObject[property]);
@@ -59,17 +59,45 @@ class JavascriptParser(Parser):
 
 		self.imports = ""
 		self.functions = [self._get_function_code(request_trees[i], i + 1) for i in range(len(request_trees))]
-		self.main = """
-const main = async () => {
+		self.common_headers = self._get_common_headers()
+		self._filter_common_headers()
+		self.main = "const main = async () => {\n"
+		self.main += "\tconst commonHeaders = " + json.dumps(self.common_headers) + ";"
+		self.main +="""
 	// const wordlist = fs.readFilesync("rockyou.txt", "utf-8").split("\\n")
 	// const len = wordlist.length;
 	// for (const i = 0; i < len; i++) {\n"""
 		for i in range(len(self.functions)):
-			self.main += "\tawait request_" + str(i + 1) + "();\n"
+			_i = str(i + 1)
+			[_, method, headers, body, url, cookies, authorization] = self.functions[i]
+			self.main += "\tconst method_" + _i + " = \"" + method + "\";\n"
+			self.main += "\tconst headers_" + _i  + " = " + json.dumps(headers) + ";\n"
+			if body is not None:
+				self.main += "\tconst body_" + _i + " = " + json.dumps(body) + ";\n"
+			self.main += "\tconst url_" + _i + " = " + json.dumps(url) + ";\n"
+			if cookies is not None:
+				self.main += "\tconst cookies_" + _i + " = " + json.dumps(cookies) + ";\n"
+			if authorization is not None:
+				self.main += "\tconst authorization_" + _i + " = \"" + authorization + "\";\n"
+			self.main += "\tawait request_" + _i + "("
+			self.main += "url_" + _i + ", "
+			self.main += "method_" + _i + ", "
+			self.main += "headers_" + _i + ", "
+			if cookies is not None:
+				self.main += "cookies_" + _i + ", "
+			else:
+				self.main += "undefined, "
+			if authorization is not None:
+				self.main += "authorization_" + _i + ", "
+			else:
+				self.main += "undefined, "
+			if body is not None:
+				self.main += "body_" + _i + ", "
+			else:
+				self.main += "undefined, "
+			self.main += "commonHeaders);\n"
 
-
-		self.main += """
-	// }
+		self.main += """\t// }
 }
 
 (() => {
@@ -77,16 +105,38 @@ const main = async () => {
 })();
 """
 		
-		code = IMPORTS + "\n\n" + UTILS + "\n\n" + "\n".join(self.functions) + "\n\n" + self.main
-		print(1)
-		print(code)
-		print(2)
+		code = IMPORTS + "\n\n" + UTILS + "\n\n" + "\n".join(
+			[func[0] for func in self.functions]
+		) + "\n\n" + self.main
 		self.copy_clipboard(code)
 
 
-	
-	def _get_function_code(self, request_tree: RequestTree, i):
-		code = "const request_" + str(i) + " = async ({\n"
+	def _get_common_headers(self):
+		ch = []
+		for arr in self.functions:
+			headers = arr[2]
+			for header_name in headers:
+				header_value = headers[header_name]
+				h = header_name + "\xff" + header_value
+				if h not in ch:
+					ch.append(h)
+		common_headers = {}
+		for c in ch:
+			header_name, header_value = c.split("\xff")
+			common_headers[header_name] = header_value
+		return common_headers
+
+
+	def _filter_common_headers(self):
+		for arr in self.functions:
+			headers = arr[2]
+			for common_header in self.common_headers:
+				if common_header in headers and headers[common_header] == self.common_headers[common_header]:
+					del headers[common_header]
+
+
+	def _get_function_code(self, request_tree, i):
+		code = "const request_" + str(i) + " = async (\n"
 		# Args
 		arg_cookie = request_tree.general.cookies
 		arg_authorization = request_tree.general.Authorization
@@ -100,16 +150,14 @@ const main = async () => {
 		}
 		arg_method = request_tree.general.method
 		arg_headers = request_tree.general.headers
-		code += "\turlObject = " + json.dumps(arg_url) + ",\n"
-		code += "\tmethod = \"" + arg_method + "\",\n"
-		code += "\theaders = " + json.dumps(arg_headers) + ",\n"
-		if arg_cookie is not None:
-			code += "\tcookies = " + json.dumps(arg_cookie) + ",\n"
-		if arg_authorization is not None:
-			code += "\tauthorization = \"" + arg_authorization + "\",\n"
-		if arg_body is not None:
-			code += "\tbody = " + json.dumps(arg_body) + ",\n"
-		code += "}) => {\n"
+		code += "\turlObject,\n"
+		code += "\tmethod,\n"
+		code += "\theaders,\n"
+		code += "\tcookies,\n"
+		code += "\tauthorization,\n"
+		code += "\tbody,\n"
+		code += "\tcommonHeaders,\n"
+		code += ") => {\n"
 		code += "\tconst url = constructUrl(urlObject);\n"
 		if arg_cookie is not None:
 			code += "\tconst stringifiedCookies = constructCookies(cookies);\n"
@@ -132,6 +180,7 @@ const main = async () => {
 		elif request_tree.application_json is not None:
 			code += "\t\t\tbody: JSON.stringify(body),\n"
 			code += "\t\t\theaders: {\n"
+			code += "\t\t\t\t...commonHeaders,\n"
 			code += "\t\t\t\t...headers,\n"
 			if arg_authorization is not None:
 				code += "\t\t\t\tAuthorization: authorization,\n"
@@ -146,6 +195,7 @@ const main = async () => {
 		elif request_tree.application_x_www_form_urlencoded is not None:
 			code += "\t\t\tbody: stringifiedBody,\n"
 			code += "\t\t\theaders: {\n"
+			code += "\t\t\t\t...commonHeaders,\n"
 			code += "\t\t\t\t...headers,\n"
 			if arg_authorization is not None:
 				code += "\t\t\t\tAuthorization: authorization,\n"
@@ -159,6 +209,7 @@ const main = async () => {
 			code += "\treturn data;\n"
 		else:
 			code += "\t\t\theaders: {\n"
+			code += "\t\t\t\t...commonHeaders,\n"
 			code += "\t\t\t\t...headers,\n"
 			if arg_authorization is not None:
 				code += "\t\t\t\tAuthorization: authorization,\n"
@@ -171,7 +222,15 @@ const main = async () => {
 			code += "\tconst data = await response.text();\n"
 			code += "\treturn data;\n"
 		code += "}\n"
-		return code
+		return [
+			code,
+			arg_method,
+			arg_headers,
+			arg_body,
+			arg_url,
+			arg_cookie,
+			arg_authorization
+		]
 
 
 	def _extract_body(self, request_tree):
