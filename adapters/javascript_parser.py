@@ -67,7 +67,7 @@ class JavascriptParser(Parser):
 		self.main +="""
 	// const wordlist = fs.readFilesync("rockyou.txt", "utf-8").split("\\n")
 	// const len = wordlist.length;
-	// for (const i = 0; i < len; i++) {\n"""
+	// for (let i = 0; i < len; i++) {\n"""
 		for i in range(len(self.functions)):
 			_i = str(i + 1)
 			[_, method, headers, body, url, cookies, authorization, files] = self.functions[i]
