@@ -21,7 +21,7 @@ app.get("/simple", (req, res) => {
 
 // GET with Query parameters
 app.get("/query", (req, res) => {
-    const params = req.params;
+    const { query } = req;
     res.send(`
 <html>
     <head>
@@ -30,7 +30,7 @@ app.get("/query", (req, res) => {
     <body>
         <h1>Example Query Get retrieval</h1>
         <h2>Subtitle of the simple request</h2>
-        <p>${JSON.stringify(params)}</p>
+        <p>${JSON.stringify(query)}</p>
     </body>
 </html>
 `);

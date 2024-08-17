@@ -1,6 +1,10 @@
 from tree_url import TreeUrl
 
 
+skip_headers = [
+    "Content-Length"
+]
+
 class TreeGeneral:
 	def __init__(self, request_data, url):
 		rd = request_data.split(u"\n")
@@ -25,6 +29,8 @@ class TreeGeneral:
 		headers_raw = u"\n".join(rd[1:]).split(u"\n\n")[0]
 		for header_line in headers_raw.split(u"\n"):
 			header_name = header_line.split(u":")[0].strip()
+			if header_name in skip_headers:
+				continue
 			header_value = u":".join(
 				header_line.split(u":")[1:]
 			).strip()
