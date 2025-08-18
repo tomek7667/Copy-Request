@@ -3,7 +3,7 @@ from adapters.javascript_parser import JavascriptParser
 from python_parser import PythonParser
 from java.io import PrintWriter # type: ignore
 from java.util import ArrayList # type: ignore
-from javax.swing import JMenuItem # type: ignore
+from javax.swing import JMenuItem, JMenu # type: ignore
 from java.awt import Toolkit # type: ignore
 from java.awt.datatransfer import StringSelection # type: ignore
 from javax.swing import JOptionPane # type: ignore
@@ -46,21 +46,47 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 		menu_list = ArrayList()
 
 		menu_list.add(JMenuItem("as javascript fetch",
-				actionPerformed=self.copy_js))
+				actionPerformed=self.copy_js_default))
+		
+		advanced_menu = JMenu("more...")
+		advanced_menu.add(JMenuItem("as javascript fetch (no filtering)",
+				actionPerformed=self.copy_js_no_filter))
+		advanced_menu.add(JMenuItem("as javascript fetch (custom filtering)",
+				actionPerformed=self.copy_js_custom))
+		
 		menu_list.add(JMenuItem("as python requests (Not yet)",
 				actionPerformed=self.copy_python))
+		menu_list.add(advanced_menu)
 
 		return menu_list
 
-	def copy_js(self, event):
+	def copy_js_default(self, event):
+		self._copy_js_with_filtering(True, None)
+
+	def copy_js_no_filter(self, event):
+		self._copy_js_with_filtering(False, None)
+
+	def copy_js_custom(self, event):
+		custom_headers = JOptionPane.showInputDialog(
+			None,
+			"Enter headers to skip (comma-separated):\nExample: User-Agent,Accept,Host",
+			"Custom Header Filtering",
+			JOptionPane.PLAIN_MESSAGE
+		)
+		if custom_headers:
+			headers_list = [h.strip() for h in custom_headers.split(',') if h.strip()]
+			self._copy_js_with_filtering(True, headers_list)
+		else:
+			self._copy_js_with_filtering(True, None)
+
+	def _copy_js_with_filtering(self, enable_filtering, custom_skip_headers):
 		requests = self.getRequestsData()
 		request_trees = []
 		for request in requests:
-			rt = RequestTree(request, self.callbacks)
+			rt = RequestTree(request, self.callbacks, custom_skip_headers, enable_filtering)
 			request_trees.append(rt)
-		JavascriptParser(request_trees, self.callbacks)
+		JavascriptParser(request_trees, self.callbacks, custom_skip_headers, enable_filtering)
 
- 
 
 	def copy_python(self, event):
 		data = self.getRequestsData()

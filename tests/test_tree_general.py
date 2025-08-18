@@ -43,7 +43,8 @@ class TestTreeGeneral(unittest.TestCase):
         request_data = "GET /test HTTP/1.1\nHost: example.com\nUser-Agent: TestAgent\nContent-Type: application/json\n\n"
         url = MockURL("https://example.com/test")
         
-        tree = TreeGeneral(request_data, url)
+        # Disable header filtering to test all headers are parsed
+        tree = TreeGeneral(request_data, url, enable_header_filtering=False)
         self.assertEqual(tree.headers["Host"], "example.com")
         self.assertEqual(tree.headers["User-Agent"], "TestAgent")
         self.assertEqual(tree.headers["Content-Type"], "application/json")

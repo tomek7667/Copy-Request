@@ -8,14 +8,31 @@ The extension is currently in development so only manual installation is possibl
 
 ## Manual Installation
 
-0. Ensure that you have `jython` in burp settings in `Python environment` section selected. If you don', follow [burp Installing Jython or JRuby](https://portswigger.net/burp/documentation/desktop/extensions/installing-extensions) tutorial.
+0. Ensure that you have `jython` in burp settings in `Python environment` section selected. If you don', follow [burp Installing Jython or JRuby](https://portswigger.net/burp/documentation/desktop/extend-burp/extensions/troubleshooting#you-need-to-configure-jython-or-jruby) tutorial.
 1. Clone the repository: `git clone https://github.com/tomek7667/Copy-Request.git`
 2. Obtain path to the `main.py` file: `<current working director>/Copy-Request/main.py`
 3. Open `Extensions` tab in Burp, and hit `Add` button.
 4. Choose `Extension type` to be `Python`
 5. Paste the path from `step 2.` into `Extension file` field and click `Next`.
 
-If everything succeeded, you should be able to Right-Click any **request** in burp and click `Extensions > Copy Request > as <language>` button. It will result in the generated code being loaded to your clipboard.
+If everything succeeded, you should be able to Right-Click any **request** in burp and see `Extensions > Copy Request` with the following options:
+
+-   **as javascript fetch** - Default option with recommended header filtering
+-   **as python requests (Not yet)** - Python implementation (coming soon)
+-   **more** - Expandable menu with additional options:
+    -   **as javascript fetch (no filtering)** - Includes all headers from the original request
+    -   **as javascript fetch (custom filtering)** - Prompts you to specify which headers to exclude
+
+## Header Filtering
+
+The header filtering system helps generate cleaner, more maintainable code:
+
+-   **Default filtering**: Excludes common browser headers like `User-Agent`, `Accept`, `Host`, etc., but always includes important headers like `Authorization`, `Content-Type`, and `Cookie`
+-   **No filtering**: Includes all headers from the original request
+-   **Custom filtering**: Allows you to specify which headers to exclude via input dialog
+
+Important headers (`Authorization`, `Content-Type`, `Cookie`) are never filtered out, even in custom filtering mode.
+
 If you have any issues installing/using the extension, please open a new issue and try to describe your issue as accurately and reproducibly as possible. I would love to make the extension most usable and comfortable for you. Also if you found anything in the README that is not clear enough feel free to open new issue and I will try to address it to best of my abillity.
 
 ## Supported languages
@@ -38,7 +55,7 @@ If you have any issues installing/using the extension, please open a new issue a
     -   [x] Create an express JS server that will allow to test manually each request
     -   [x] Some unit tests that verify the parsing process with different scenarios
     -   [x] CI pipeline that runs the unit tests.
-    -   [ ] Add optional headers filtering
+    -   [x] Add optional headers filtering
 -   Python/Go
     -   [ ] Same roadmap as for JS. Will be filled when JS roadmap is finished.
 

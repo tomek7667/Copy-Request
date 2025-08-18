@@ -1,14 +1,14 @@
 import json
 import base64
-from java.io import PrintWriter
+from java.io import PrintWriter # type: ignore
 from tree_general import TreeGeneral
 
 class RequestTree:
-	def __init__(self, data, callbacks):
+	def __init__(self, data, callbacks, custom_skip_headers=None, enable_header_filtering=True):
 		self.callbacks = callbacks
 		self.stdout = PrintWriter(callbacks.getStdout(), True)
 		self.stderr = PrintWriter(callbacks.getStderr(), True)
-		self.general = TreeGeneral(data["request_data"], data["url"])
+		self.general = TreeGeneral(data["request_data"], data["url"], custom_skip_headers, enable_header_filtering)
 		content_type = self.general.headers["Content-Type"] if "Content-Type" in self.general.headers else None
 		if content_type is not None and "multipart/form-data" in content_type:
 			content_type = "multipart/form-data"

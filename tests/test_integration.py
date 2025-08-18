@@ -127,8 +127,8 @@ class TestIntegration(unittest.TestCase):
             "url": MockURL(f"http://localhost:{self.port}/test?param1=value1")
         }
         
-        tree = RequestTree(data, self.callbacks)
-        parser = JavascriptParser([tree], self.callbacks)
+        tree = RequestTree(data, self.callbacks, enable_header_filtering=False)
+        parser = JavascriptParser([tree], self.callbacks, None, False)
         
         self.assertIsNotNone(clipboard_data)
         self.assertIn("const request_1 = async", clipboard_data)
@@ -142,8 +142,8 @@ class TestIntegration(unittest.TestCase):
             "url": MockURL(f"http://localhost:{self.port}/login")
         }
         
-        tree = RequestTree(data, self.callbacks)
-        parser = JavascriptParser([tree], self.callbacks)
+        tree = RequestTree(data, self.callbacks, enable_header_filtering=False)
+        parser = JavascriptParser([tree], self.callbacks, None, False)
         
         self.assertIn("JSON.stringify(body)", clipboard_data)
         self.assertIn("test", clipboard_data)
@@ -154,8 +154,8 @@ class TestIntegration(unittest.TestCase):
             "url": MockURL(f"http://localhost:{self.port}/simple")
         }
         
-        tree = RequestTree(data, self.callbacks)
-        parser = JavascriptParser([tree], self.callbacks)
+        tree = RequestTree(data, self.callbacks, enable_header_filtering=False)
+        parser = JavascriptParser([tree], self.callbacks, None, False)
         
         # Basic syntax checks
         self.assertIn("const ", clipboard_data)

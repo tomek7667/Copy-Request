@@ -82,7 +82,7 @@ class TestJavascriptParser(unittest.TestCase):
             cookies={"session": "abc123"}
         )
         
-        JavascriptParser([tree], self.callbacks)
+        JavascriptParser([tree], self.callbacks, None, True)
         
         self.assertIsNotNone(clipboard_data)
         self.assertIn("const request_1 = async", clipboard_data)
@@ -98,7 +98,7 @@ class TestJavascriptParser(unittest.TestCase):
             body_data={"username": "test"}
         )
         
-        JavascriptParser([tree], self.callbacks)
+        JavascriptParser([tree], self.callbacks, None, True)
         
         self.assertIn("JSON.stringify(body)", clipboard_data)
         self.assertIn("Authorization: authorization", clipboard_data)
@@ -111,7 +111,7 @@ class TestJavascriptParser(unittest.TestCase):
             body_data={"key1": "value1"}
         )
         
-        JavascriptParser([tree], self.callbacks)
+        JavascriptParser([tree], self.callbacks, None, True)
         
         self.assertIn("constructXWwwFormUrlencoded", clipboard_data)
         self.assertIn("body: stringifiedBody", clipboard_data)
@@ -125,7 +125,7 @@ class TestJavascriptParser(unittest.TestCase):
             files=[{"for": "file", "filename": "test.txt", "contentType": "text/plain", "data": "dGVzdA=="}]
         )
         
-        JavascriptParser([tree], self.callbacks)
+        JavascriptParser([tree], self.callbacks, None, True)
         
         self.assertIn("new FormData()", clipboard_data)
         self.assertIn("atob(file[\"data\"])", clipboard_data)

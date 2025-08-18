@@ -53,7 +53,7 @@ const constructXWwwFormUrlencoded = (bodyObject) => {
 """[1:-1]
 
 class JavascriptParser(Parser):
-	def __init__(self, request_trees, callbacks):
+	def __init__(self, request_trees, callbacks, custom_skip_headers=None, enable_header_filtering=True):
 		self.callbacks = callbacks
 		self.stdout = PrintWriter(callbacks.getStdout(), True)
 		self.stderr = PrintWriter(callbacks.getStderr(), True)
