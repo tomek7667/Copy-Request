@@ -6,7 +6,7 @@ const chalk = require("chalk");
 const listEndpoints = require("express-list-endpoints");
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3234;
 
 // Configure multer for file uploads
 const upload = multer({
