@@ -1,12 +1,12 @@
-from burp import IBurpExtender, IContextMenuFactory, IHttpRequestResponse
+from burp import IBurpExtender, IContextMenuFactory, IHttpRequestResponse # type: ignore
 from adapters.javascript_parser import JavascriptParser
 from python_parser import PythonParser
-from java.io import PrintWriter
-from java.util import ArrayList
-from javax.swing import JMenuItem
-from java.awt import Toolkit
-from java.awt.datatransfer import StringSelection
-from javax.swing import JOptionPane
+from java.io import PrintWriter # type: ignore
+from java.util import ArrayList # type: ignore
+from javax.swing import JMenuItem # type: ignore
+from java.awt import Toolkit # type: ignore
+from java.awt.datatransfer import StringSelection # type: ignore
+from javax.swing import JOptionPane # type: ignore
 import json
 import subprocess
 import tempfile

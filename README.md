@@ -6,10 +6,10 @@ The extension is currently in development so only manual installation is possibl
 
 ## Manual Installation
 
-0. Ensure that you have `jython` in burp settings in `Python environment` section selected. If you don', follow [burp Installing Jython or JRuby](https://portswigger.net/burp/documentation/desktop/extensions/installing-extensions) tutorial. 
+0. Ensure that you have `jython` in burp settings in `Python environment` section selected. If you don', follow [burp Installing Jython or JRuby](https://portswigger.net/burp/documentation/desktop/extensions/installing-extensions) tutorial.
 1. Clone the repository: `git clone https://github.com/tomek7667/Copy-Request.git`
 2. Obtain path to the `main.py` file: `<current working director>/Copy-Request/main.py`
-3. Open `Extensions` tab in Burp, and hit `Add` button. 
+3. Open `Extensions` tab in Burp, and hit `Add` button.
 4. Choose `Extension type` to be `Python`
 5. Paste the path from `step 2.` into `Extension file` field and click `Next`.
 
@@ -18,27 +18,27 @@ If you have any issues installing/using the extension, please open a new issue a
 
 ## Supported languages
 
-- [x] JS 
-- [ ] Python
-- [ ] Go
+-   [x] JS
+-   [ ] Python
+-   [ ] Go
 
-## Roadmap 
+## Roadmap
 
-- [x] Copy GET/HEAD requests
-- [x] Refactor code to construct an abstract structure that will descripe the request, like the forms etc. Then just pass the abstract structure to different parsers that will generate the code needed to call the requests.
-- JS 
-    - [x] Copied request is a separate function that is called in main function asynchronously
-    - [x] POST request with Content-Type: `application/json`
-    - [x] Variable'ized cookie, url and body of a request
-    - [x] POST request with Content-Type `application/x-www-form-urlencoded`
-    - [x] POST request with Content-Type `multipart/form-data` that will support selecting a file at `"<path_to_file>"`. In JS via `new FormData()`
-    - [x] Commented generated code, commented loop with the request with example array or loaded from a file wordlist
-    - [x] Create an express JS server that will allow to test manually each request
-    - [ ] Some unit tests that verify the parsing process with different scenarios
-    - [ ] CI pipeline that runs the unit tests.
-    - [ ] Add optional headers filtering
-- Python/Go
-    - [ ] Same roadmap as for JS. Will be filled when JS roadmap is finished.
+-   [x] Copy GET/HEAD requests
+-   [x] Refactor code to construct an abstract structure that will descripe the request, like the forms etc. Then just pass the abstract structure to different parsers that will generate the code needed to call the requests.
+-   JS
+    -   [x] Copied request is a separate function that is called in main function asynchronously
+    -   [x] POST request with Content-Type: `application/json`
+    -   [x] Variable'ized cookie, url and body of a request
+    -   [x] POST request with Content-Type `application/x-www-form-urlencoded`
+    -   [x] POST request with Content-Type `multipart/form-data` that will support selecting a file at `"<path_to_file>"`. In JS via `new FormData()`
+    -   [x] Commented generated code, commented loop with the request with example array or loaded from a file wordlist
+    -   [x] Create an express JS server that will allow to test manually each request
+    -   [ ] Some unit tests that verify the parsing process with different scenarios
+    -   [ ] CI pipeline that runs the unit tests.
+    -   [ ] Add optional headers filtering
+-   Python/Go
+    -   [ ] Same roadmap as for JS. Will be filled when JS roadmap is finished.
 
 ## Test Server
 
@@ -59,44 +59,44 @@ Second point in roadmap example abstract object for parsers:
 
 ```json
 {
-    "general": {
-        "method": "GET",
-        "headers": {
-            "Content-Type": "application/json"
-        },
-        "Authorization": "Bearer abc",
-        "httpVersion": "1.1",
-        "url": {
-            "raw": "https://example.com/abc/def?param1=value1",
-            "parameters": {
-                "param1": "value1"
-            },
-            "path": "/abc/def",
-            "protocol": "https",
-            "domain": "example.com",
-            "port": 443
-        },
-        "cookies": {
-            "key": "value"
-        }
-    },
-    "application/json": {
-        "param1": "value1"
-    },
-    "application/x-www-form-urlencoded": {
-        "param1": "value1"
-    },
-    "multipart/form-data": {
-        "param1": "value1"
-    },
-    "files": [
-        {
-            "for": "file",
-            "filename": "bump.js",
-            "contentType": "application/json",
-            "data": "base64_data"
-        }
-    ]
+	"general": {
+		"method": "GET",
+		"headers": {
+			"Content-Type": "application/json"
+		},
+		"Authorization": "Bearer abc",
+		"httpVersion": "1.1",
+		"url": {
+			"raw": "https://example.com/abc/def?param1=value1",
+			"parameters": {
+				"param1": "value1"
+			},
+			"path": "/abc/def",
+			"protocol": "https",
+			"domain": "example.com",
+			"port": 443
+		},
+		"cookies": {
+			"key": "value"
+		}
+	},
+	"application/json": {
+		"param1": "value1"
+	},
+	"application/x-www-form-urlencoded": {
+		"param1": "value1"
+	},
+	"multipart/form-data": {
+		"param1": "value1"
+	},
+	"files": [
+		{
+			"for": "file",
+			"filename": "bump.js",
+			"contentType": "application/json",
+			"data": "base64_data"
+		}
+	]
 }
 ```
 
@@ -104,15 +104,14 @@ Second point in roadmap example abstract object for parsers:
 
 Features in code:
 
-- arguments to generated functions have default values of:
-    - Cookies as one argument as dict: `{ "a": "1", "b": "2" }`
-    - Authorization value *(only after `=`)*
-    - Body as one argument as dict: `{ "a": "1", "b": "2" }`
-    - Url as a dict constructed from: `{ "parameters": { "a": "b"}, "path": "/a/b/", "protocol": "https", "domain": "example.com", "port": 443 }`
-    - Method as a string: `"GET"`
-    - *files to be considered*
-- when `multipart/form-data` trim Content-Type from headers, files are not passed through the arguments, but already in the function, as `atob` and in the comment the `fs.readFileSync`.
-- imports at the beginning of the file
-- interpolating all values
-- add utility function/s (e.g. construct url)
-
+-   arguments to generated functions have default values of:
+    -   Cookies as one argument as dict: `{ "a": "1", "b": "2" }`
+    -   Authorization value _(only after `=`)_
+    -   Body as one argument as dict: `{ "a": "1", "b": "2" }`
+    -   Url as a dict constructed from: `{ "parameters": { "a": "b"}, "path": "/a/b/", "protocol": "https", "domain": "example.com", "port": 443 }`
+    -   Method as a string: `"GET"`
+    -   _files to be considered_
+-   when `multipart/form-data` trim Content-Type from headers, files are not passed through the arguments, but already in the function, as `atob` and in the comment the `fs.readFileSync`.
+-   imports at the beginning of the file
+-   interpolating all values
+-   add utility function/s (e.g. construct url)

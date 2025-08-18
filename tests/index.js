@@ -5,7 +5,7 @@ const port = Number(process.env.PORT ?? 3000);
 
 // Simple GET /
 app.get("/simple", (req, res) => {
-    res.send(`
+	res.send(`
 <html>
     <head>
         <title>Simple test</title>
@@ -17,12 +17,12 @@ app.get("/simple", (req, res) => {
     </body>
 </html>
 `);
-})
+});
 
 // GET with Query parameters
 app.get("/query", (req, res) => {
-    const { query } = req;
-    res.send(`
+	const { query } = req;
+	res.send(`
 <html>
     <head>
         <title>Query test</title>
@@ -34,9 +34,8 @@ app.get("/query", (req, res) => {
     </body>
 </html>
 `);
-})
-
-app.listen(port, () => {
-    console.log(`Test app is listening on http://127.0.0.1:${port}`);
 });
 
+app.listen(port, () => {
+	console.log(`Test app is listening on http://127.0.0.1:${port}`);
+});
