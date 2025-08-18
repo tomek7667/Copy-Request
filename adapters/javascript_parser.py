@@ -1,6 +1,6 @@
 import json
 import hashlib
-from java.io import PrintWriter
+from java.io import PrintWriter # type: ignore
 from request_tree import RequestTree
 from u_parser import Parser
 
@@ -113,8 +113,8 @@ class JavascriptParser(Parser):
 		self.main += """\t// }
 }
 
-(() => {
-	main()
+(async () => {
+	await main()
 })();
 """
 		

@@ -1,6 +1,6 @@
-from java.io import PrintWriter
+from java.io import PrintWriter # type: ignore
 from u_parser import Parser
-from common import *
+from common import * # type: ignore
 
 class PythonParser(Parser):
 	def __init__(self, callbacks):

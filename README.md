@@ -33,12 +33,23 @@ If you have any issues installing/using the extension, please open a new issue a
     - [x] POST request with Content-Type `application/x-www-form-urlencoded`
     - [x] POST request with Content-Type `multipart/form-data` that will support selecting a file at `"<path_to_file>"`. In JS via `new FormData()`
     - [x] Commented generated code, commented loop with the request with example array or loaded from a file wordlist
-    - [ ] Create an express JS server that will allow to test manually each request
+    - [x] Create an express JS server that will allow to test manually each request
     - [ ] Some unit tests that verify the parsing process with different scenarios
     - [ ] CI pipeline that runs the unit tests.
     - [ ] Add optional headers filtering
 - Python/Go
     - [ ] Same roadmap as for JS. Will be filled when JS roadmap is finished.
+
+## Test Server
+
+A comprehensive test server is included to test and log requests made by your generated JavaScript code:
+
+1. Install dependencies: `npm install`
+2. Start the server: `npm start`
+3. Run your generated code pointing to `http://localhost:3001`
+4. Check server console for logged request details
+
+See [TEST-SERVER.md](TEST-SERVER.md) for detailed instructions.
 
 If you have any ideas or improvements that you would like to see in the extension, please open a new issue and I would love to implement it!
 

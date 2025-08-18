@@ -1,0 +1,27 @@
+{
+	"name": "copy-request-test-server",
+	"version": "1.0.0",
+	"description": "Test server for Copy-Request generated code",
+	"main": "test-server.js",
+	"scripts": {
+		"start": "node test-server.js",
+		"dev": "nodemon test-server.js"
+	},
+	"dependencies": {
+		"express": "^4.21.2",
+		"multer": "^1.4.5-lts.1",
+		"chalk": "^4.1.2",
+		"express-list-endpoints": "^6.0.0"
+	},
+	"keywords": [
+		"burp",
+		"testing",
+		"http",
+		"requests"
+	],
+	"author": "Copy-Request",
+	"license": "MIT",
+	"devDependencies": {
+		"nodemon": "^3.1.10"
+	}
+}
