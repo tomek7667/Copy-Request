@@ -131,7 +131,7 @@ class JavascriptParser(Parser):
 			headers = arr[2]
 			for header_name in headers:
 				header_value = headers[header_name]
-				hsh = hashlib.sha256(header_name + header_value)
+				hsh = hashlib.sha256((header_name + header_value).encode('utf-8'))
 				if hsh not in hashes:
 					hashes.append(hsh)
 					values.append((header_name, header_value))
