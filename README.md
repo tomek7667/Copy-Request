@@ -1,5 +1,7 @@
 # Copy-Request
 
+[![Unit tests](https://github.com/tomek7667/Copy-Request/actions/workflows/test.yml/badge.svg)](https://github.com/tomek7667/Copy-Request/actions/workflows/test.yml)
+
 Copy your request from Burp to its programmatic equivalent in chosen language.
 
 The extension is currently in development so only manual installation is possible rather than from the BApp store, as this requires [some extensive process](https://portswigger.net/burp/documentation/desktop/extensions/creating/bapp-store-submitting-extensions) to get it deployed there, and further updates are pretty painful.
