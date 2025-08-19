@@ -30,14 +30,8 @@ def run_tests():
     
     print("Running Copy-Request Parser Tests")
     print("=" * 40)
-    
     # Run individual test files
-    test_files = [
-        "test_request_tree.py",
-        "test_javascript_parser.py", 
-        "test_tree_general.py",
-        "test_integration.py"
-    ]
+    test_files = [p for p in os.listdir(test_dir) if p.startswith("test_") and p.endswith(".py")]
     
     total_passed = 0
     total_failed = 0
