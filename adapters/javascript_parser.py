@@ -88,7 +88,7 @@ class JavascriptParser(Parser):
 				self.main += "\tconst files_" + _i + " = ["
 				files_variables = ", ".join(["file_" + str(j + 1) for j in range(len(files))])
 				self.main += files_variables + "];\n"
-			self.main += "\tawait request_" + _i + "("
+			self.main += "\tconst res_" + _i + " = await request_" + _i + "("
 			self.main += "url_" + _i + ", "
 			self.main += "method_" + _i + ", "
 			self.main += "headers_" + _i + ", "
@@ -109,6 +109,7 @@ class JavascriptParser(Parser):
 			else:
 				self.main += "undefined, "
 			self.main += "commonHeaders);\n"
+			self.main += "\t// console.log(res_" + _i + ");\n"
 
 		self.main += """\t// }
 }
