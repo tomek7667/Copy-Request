@@ -78,7 +78,7 @@ const main = async () => {
 		domain: "example.com",
 		parameters: {},
 	};
-	await request_1(
+	const res_1 = await request_1(
 		url_1,
 		method_1,
 		headers_1,
@@ -88,6 +88,7 @@ const main = async () => {
 		undefined,
 		commonHeaders
 	);
+	// console.log(res_1);
 	// }
 };
 
