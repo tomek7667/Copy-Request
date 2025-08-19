@@ -15,6 +15,8 @@ The extension is currently in development so only manual installation is possibl
 4. Choose `Extension type` to be `Python`
 5. Paste the path from `step 2.` into `Extension file` field and click `Next`.
 
+## Usage
+
 If everything succeeded, you should be able to Right-Click any **request** in burp and see `Extensions > Copy Request` with the following options:
 
 -   **as javascript fetch** - Default option with recommended header filtering
