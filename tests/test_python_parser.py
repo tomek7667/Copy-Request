@@ -86,7 +86,7 @@ class TestPythonParser(unittest.TestCase):
         
         self.assertIsNotNone(clipboard_data)
         self.assertIn("def request_1(", clipboard_data)
-        self.assertIn("UrlObject", clipboard_data)
+        self.assertIn("construct_url", clipboard_data)
         self.assertIn("requests.request(", clipboard_data)
 
     def test_post_json_generation(self):
@@ -143,7 +143,7 @@ class TestPythonParser(unittest.TestCase):
         
         PythonParser([tree], self.callbacks, None, True)
         
-        self.assertIn("class UrlObject:", clipboard_data)
+        self.assertIn("def construct_url", clipboard_data)
         self.assertIn("def construct_cookies", clipboard_data)
         self.assertIn("def construct_x_www_form_urlencoded", clipboard_data)
 
