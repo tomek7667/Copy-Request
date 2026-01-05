@@ -1,6 +1,7 @@
 import requests
 import urllib.parse
 import socket
+import base64
 import urllib3.util.connection as urllib3_cn
 
 def _allowed_gai_family():

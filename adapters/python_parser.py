@@ -7,6 +7,7 @@ from u_parser import Parser
 IMPORTS = """import requests
 import urllib.parse
 import socket
+import base64
 import urllib3.util.connection as urllib3_cn
 
 def _allowed_gai_family():
@@ -55,7 +56,6 @@ class PythonParser(Parser):
 		self.stdout = PrintWriter(callbacks.getStdout(), True)
 		self.stderr = PrintWriter(callbacks.getStderr(), True)
 
-		self.imports = ""
 		self.functions = [self._get_function_code(request_trees[i], i + 1) for i in range(len(request_trees))]
 		self.common_headers = self._get_common_headers()
 		self._filter_common_headers()
