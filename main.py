@@ -35,9 +35,6 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 		self.callbacks = callbacks
 		callbacks.registerContextMenuFactory(self)
 
-		# Load parsers
-		self.pythonParser = PythonParser(callbacks)
-
 		print("BurpExtender::registerExtenderCallbacks: " + self.toString() + " loaded successfully!")
 
 
@@ -53,9 +50,13 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 				actionPerformed=self.copy_js_no_filter))
 		advanced_menu.add(JMenuItem("as javascript fetch (custom filtering)",
 				actionPerformed=self.copy_js_custom))
+		advanced_menu.add(JMenuItem("as python requests",
+				actionPerformed=self.copy_python_default))
+		advanced_menu.add(JMenuItem("as python requests (no filtering)",
+				actionPerformed=self.copy_python_no_filter))
+		advanced_menu.add(JMenuItem("as python requests (custom filtering)",
+				actionPerformed=self.copy_python_custom))
 		
-		menu_list.add(JMenuItem("as python requests (Not yet)",
-				actionPerformed=self.copy_python))
 		menu_list.add(advanced_menu)
 
 		return menu_list
@@ -88,9 +89,32 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 		JavascriptParser(request_trees, self.callbacks, custom_skip_headers, enable_filtering)
 
 
-	def copy_python(self, event):
-		data = self.getRequestsData()
-		self.pythonParser.parse(data)
+	def copy_python_default(self, event):
+		self._copy_python_with_filtering(True, None)
+
+	def copy_python_no_filter(self, event):
+		self._copy_python_with_filtering(False, None)
+
+	def copy_python_custom(self, event):
+		custom_headers = JOptionPane.showInputDialog(
+			None,
+			"Enter headers to skip (comma-separated):\nExample: User-Agent,Accept,Host",
+			"Custom Header Filtering",
+			JOptionPane.PLAIN_MESSAGE
+		)
+		if custom_headers:
+			headers_list = [h.strip() for h in custom_headers.split(',') if h.strip()]
+			self._copy_python_with_filtering(True, headers_list)
+		else:
+			self._copy_python_with_filtering(True, None)
+
+	def _copy_python_with_filtering(self, enable_filtering, custom_skip_headers):
+		requests = self.getRequestsData()
+		request_trees = []
+		for request in requests:
+			rt = RequestTree(request, self.callbacks, custom_skip_headers, enable_filtering)
+			request_trees.append(rt)
+		self.pythonParser = PythonParser(request_trees, self.callbacks, custom_skip_headers, enable_filtering)
 
 
 	def getRequestsData(self):
