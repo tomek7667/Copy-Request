@@ -56,6 +56,8 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 				actionPerformed=self.copy_python_no_filter))
 		advanced_menu.add(JMenuItem("as python requests (custom filtering)",
 				actionPerformed=self.copy_python_custom))
+		advanced_menu.add(JMenuItem("Advanced...",
+				actionPerformed=self.copy_advanced))
 		
 		menu_list.add(advanced_menu)
 
@@ -115,6 +117,72 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 			rt = RequestTree(request, self.callbacks, custom_skip_headers, enable_filtering)
 			request_trees.append(rt)
 		self.pythonParser = PythonParser(request_trees, self.callbacks, custom_skip_headers, enable_filtering)
+
+
+	def copy_advanced(self, event):
+		"""Show advanced dialog to select language and target content-type."""
+		from content_type_converter import ContentTypeConverter
+		
+		# Get supported content types
+		supported_types = ContentTypeConverter.get_supported_conversions()
+		content_type_options = "\n".join([str(i+1) + ". " + ct for i, ct in enumerate(supported_types)])
+		
+		# Show dialog to select target content type
+		user_input = JOptionPane.showInputDialog(
+			None,
+			"Advanced Copy Options:\n\n" +
+			"Select target Content-Type (enter number):\n" + content_type_options +
+			"\n\nSelect language (js/python):\nExample: 1,js or 2,python",
+			"Advanced Copy",
+			JOptionPane.PLAIN_MESSAGE
+		)
+		
+		if not user_input:
+			return
+		
+		# Parse user input
+		parts = [p.strip() for p in user_input.split(',')]
+		if len(parts) != 2:
+			JOptionPane.showMessageDialog(
+				None,
+				"Invalid input. Please use format: number,language\nExample: 1,js",
+				"Error",
+				JOptionPane.ERROR_MESSAGE
+			)
+			return
+		
+		try:
+			content_type_index = int(parts[0]) - 1
+			language = parts[1].lower()
+			
+			if content_type_index < 0 or content_type_index >= len(supported_types):
+				raise ValueError("Invalid content type selection")
+			
+			if language not in ['js', 'python']:
+				raise ValueError("Language must be 'js' or 'python'")
+			
+			target_content_type = supported_types[content_type_index]
+			
+			# Get requests and create request trees with conversion
+			requests = self.getRequestsData()
+			request_trees = []
+			for request in requests:
+				rt = RequestTree(request, self.callbacks, None, True, target_content_type)
+				request_trees.append(rt)
+			
+			# Generate code in selected language
+			if language == 'js':
+				JavascriptParser(request_trees, self.callbacks, None, True)
+			else:
+				PythonParser(request_trees, self.callbacks, None, True)
+				
+		except (ValueError, IndexError) as e:
+			JOptionPane.showMessageDialog(
+				None,
+				"Invalid input: " + str(e),
+				"Error",
+				JOptionPane.ERROR_MESSAGE
+			)
 
 
 	def getRequestsData(self):

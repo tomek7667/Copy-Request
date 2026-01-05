@@ -28,6 +28,7 @@ if __name__ == '__main__':
     
     # Run tests individually to avoid conflicts
     test_files = [
+        'test_content_type_converter.py',
         'test_header_filtering.py',
         'test_tree_general.py', 
         'test_request_tree.py',
