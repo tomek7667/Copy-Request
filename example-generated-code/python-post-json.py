@@ -170,21 +170,21 @@ def main():
     # payloads = ["admin", "root", "test"]
     # for payload in payloads:
     #     body_1["username"] = payload  # Inject payload
-    #     res = request_1(url_1, method_1, headers_1, cookies_1, authorization_1, body_1, None, common_headers)
-    #     print(f"Payload: {payload}, Status: {res}")
+    #     res = request_1(url_1, method_1, headers_1, None, None, body_1, None, common_headers)
+    #     print(f"Payload: {payload}, Response: {res.status_code}")
     
     # Example 2: Load testing with threading
     # def make_request(iteration):
-    #     return request_1(url_1, method_1, headers_1, cookies_1, authorization_1, body_1, None, common_headers)
+    #     return request_1(url_1, method_1, headers_1, None, None, body_1, None, common_headers)
     # 
     # results = execute_parallel_requests(make_request, range(100), max_workers=20)
     # print(f"Completed {len(results)} requests")
     
-    # Example 3: Multiple requests in sequence
+    # Example 3: Multiple requests in sequence with parameter variation
     # for i in range(10):
     #     url_1.update_params(id=i)  # Dynamically update URL params
-    #     res = request_1(url_1, method_1, headers_1, cookies_1, authorization_1, body_1, None, common_headers)
-    #     print(f"Request {i}: {res[:100]}...")
+    #     res = request_1(url_1, method_1, headers_1, None, None, None, None, common_headers)
+    #     print(f"Request {i}: Status {res.status_code}")
 
 
 if __name__ == "__main__":
