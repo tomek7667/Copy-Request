@@ -33,6 +33,7 @@ if __name__ == '__main__':
         'test_tree_general.py', 
         'test_request_tree.py',
         'test_javascript_parser.py',
+        'test_advanced_copy.py',
         'test_integration.py'
     ]
     

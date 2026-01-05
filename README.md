@@ -24,6 +24,32 @@ If everything succeeded, you should be able to Right-Click any **request** in bu
 -   **more** - Expandable menu with additional options:
     -   **as javascript fetch (no filtering)** - Includes all headers from the original request
     -   **as javascript fetch (custom filtering)** - Prompts you to specify which headers to exclude
+    -   **as python requests** - Python implementation with default filtering
+    -   **as python requests (no filtering)** - Python implementation with all headers
+    -   **as python requests (custom filtering)** - Python implementation with custom header filtering
+    -   **Advanced...** - Convert request to a different content-type and language
+
+## Advanced Copy Feature
+
+The **Advanced...** option allows you to copy a request with a different content-type than the original. This is useful for testing how APIs handle different content-types or for CTF challenges.
+
+When you select **Advanced...**, you'll be prompted to:
+1. Select a target content-type (e.g., `application/json` or `application/x-www-form-urlencoded`)
+2. Choose the output language (`js` for JavaScript or `python` for Python)
+
+The extension will automatically:
+-   Convert the request body from the original content-type to the target content-type
+-   Update the `Content-Type` header accordingly
+-   Generate code in your chosen language
+
+**Example usage:**
+```
+Input: 1,js
+```
+This converts to `application/json` (option 1) and generates JavaScript code.
+
+**Supported conversions:**
+-   JSON ↔ x-www-form-urlencoded
 
 ## Header Filtering
 
