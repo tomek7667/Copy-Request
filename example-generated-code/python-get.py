@@ -8,6 +8,7 @@ def _allowed_gai_family():
 
 urllib3_cn.allowed_gai_family = _allowed_gai_family
 
+
 class UrlObject:
     def __init__(
         self,
@@ -52,6 +53,7 @@ def request_1(
 ) -> requests.Response:
     u = str(url_object)
     h = {**common_headers, **headers}
+    
     response = requests.request(
         url=u,
         method=method,
@@ -63,11 +65,7 @@ def request_1(
     return data
 
 def main():
-    common_headers = {
-        "Sec-Ch-Ua": '"Not)A;Brand";v="8", "Chromium";v="138"',
-		"Sec-Ch-Ua-Platform": '"macOS"',
-		"Sec-Ch-Ua-Mobile": "?0",
-    }
+    common_headers = {"Sec-Ch-Ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\"", "Sec-Ch-Ua-Platform": "\"macOS\"", "Sec-Ch-Ua-Mobile": "?0"}
     # wordlist = open("rockyou.txt", "r").read().split("\n")
     # l = len(wordlist)
     # for i in range(l):
@@ -82,9 +80,13 @@ def main():
     )
     res_1 = request_1(
         url_object=url_1,
-        common_headers=common_headers,
         method=method_1,
         headers=headers_1,
+        cookies=None,
+        authorization=None,
+        body=None,
+        files=None,
+        common_headers=common_headers,
     )
     # print("res_1 = ", res_1)
 

@@ -20,10 +20,12 @@ The extension is currently in development so only manual installation is possibl
 If everything succeeded, you should be able to Right-Click any **request** in burp and see `Extensions > Copy Request` with the following options:
 
 -   **as javascript fetch** - Default option with recommended header filtering
--   **as python requests (Not yet)** - Python implementation (coming soon)
 -   **more** - Expandable menu with additional options:
     -   **as javascript fetch (no filtering)** - Includes all headers from the original request
     -   **as javascript fetch (custom filtering)** - Prompts you to specify which headers to exclude
+    -   **as python requests** - Python implementation with recommended header filtering
+    -   **as python requests (no filtering)** - Python with all headers included
+    -   **as python requests (custom filtering)** - Python with custom header filtering
 
 ## Header Filtering
 
@@ -40,7 +42,7 @@ If you have any issues installing/using the extension, please open a new issue a
 ## Supported languages
 
 -   [x] JS
--   [ ] Python
+-   [x] Python (First step completed - GET/POST requests with all content types)
 -   [ ] Go
 
 ## Roadmap
@@ -59,7 +61,15 @@ If you have any issues installing/using the extension, please open a new issue a
     -   [x] CI pipeline that runs the unit tests.
     -   [x] Add optional headers filtering
 -   Python/Go
-    -   [ ] Same roadmap as for JS. Will be filled when JS roadmap is finished.
+    -   [x] First step: Implement basic GET request generation (Python)
+    -   [x] POST request with Content-Type: `application/json` (Python)
+    -   [x] POST request with Content-Type `application/x-www-form-urlencoded` (Python)
+    -   [x] POST request with Content-Type `multipart/form-data` (Python)
+    -   [x] Variable'ized cookie, url and body of a request (Python)
+    -   [x] Commented generated code with example loop (Python)
+    -   [x] Some unit tests for Python parser
+    -   [ ] Integration with test server for Python generated code
+    -   [ ] Same roadmap for Go
 
 ## Test Server
 

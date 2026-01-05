@@ -34,7 +34,7 @@ sys.modules['burp'] = burp
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from python_parser import PythonParser
+from adapters.python_parser import PythonParser
 
 class MockRequestTree:
     def __init__(self, method="GET", headers=None, cookies=None, auth=None, url_data=None, body_type=None, body_data=None, files=None):

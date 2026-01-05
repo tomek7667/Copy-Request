@@ -1,6 +1,6 @@
 from burp import IBurpExtender, IContextMenuFactory, IHttpRequestResponse # type: ignore
 from adapters.javascript_parser import JavascriptParser
-from python_parser import PythonParser
+from adapters.python_parser import PythonParser
 from java.io import PrintWriter # type: ignore
 from java.util import ArrayList # type: ignore
 from javax.swing import JMenuItem, JMenu # type: ignore
