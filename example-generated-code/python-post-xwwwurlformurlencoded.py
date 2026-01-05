@@ -87,12 +87,17 @@ def request_1(
     proxies=None,
 ):
     url = construct_url(url_object)
+    stringified_cookies = construct_cookies(cookies) if cookies else ""
+    stringified_body = construct_x_www_form_urlencoded(body) if body else ""
     h = {**common_headers, **headers}
+    if cookies:
+        h["Cookie"] = stringified_cookies
     
     response = requests.request(
         url=url,
         method=method,
         headers=h,
+        data=stringified_body if body else None,
         allow_redirects=False,
         timeout=timeout,
         verify=verify_ssl,
@@ -101,28 +106,30 @@ def request_1(
     return response
 
 def main():
-    common_headers = {"Sec-Ch-Ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\"", "Sec-Ch-Ua-Platform": "\"macOS\"", "Sec-Ch-Ua-Mobile": "?0"}
+    common_headers = {"Content-Type": "application/x-www-form-urlencoded", "Sec-Ch-Ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\"", "Sec-Ch-Ua-Platform": "\"macOS\"", "Sec-Ch-Ua-Mobile": "?0"}
     
     # payloads = sqli_payloads
     # payloads = xss_payloads
     # payloads = reverse_shell_payloads
     
-    method_1 = "GET"
+    method_1 = "POST"
     headers_1 = {}
+    body_1 = {"a": "1", "b": "2"}
     url_1 = {
-        "domain": "example.com",
+        "domain": "jsonplaceholder.typicode.com",
         "protocol": "https",
         "port": 443,
-        "path": "/",
+        "path": "/todos",
         "parameters": {},
     }
+    cookies_1 = {"c": "123"}
     res_1 = request_1(
         url_1,
         method_1,
         headers_1,
+        cookies_1,
         None,
-        None,
-        None,
+        body_1,
         None,
         common_headers,
     )
