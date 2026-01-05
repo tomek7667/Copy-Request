@@ -100,12 +100,16 @@ class RequestTree:
 		while i < len(encoded):
 			c = encoded[i]
 			if c == '%':
-				url_value = int(
-					encoded[i+1:i+3],
-					16
-				)
-				result += chr(url_value)
-				i += 3
+				if i + 2 < len(encoded):
+					url_value = int(
+						encoded[i+1:i+3],
+						16
+					)
+					result += chr(url_value)
+					i += 3
+				else:
+					result += c
+					i += 1
 			else:
 				result += c
 				i += 1
