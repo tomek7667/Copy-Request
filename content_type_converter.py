@@ -78,8 +78,10 @@ class ContentTypeConverter:
     
     @staticmethod
     def _from_dict(data_dict, content_type):
-        """Convert dictionary to target content type format."""
-        # All formats use dict internally, actual conversion happens in parsers
+        """
+        Return dict in format suitable for target content type.
+        All content types use dict internally; actual serialization happens in language parsers.
+        """
         return data_dict
     
     @staticmethod
