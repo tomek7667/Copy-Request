@@ -127,9 +127,8 @@ class RequestTree:
 			original_body = self.application_x_www_form_urlencoded
 			from_type = "application/x-www-form-urlencoded"
 		elif self.multipart_form_data is not None:
-			# Multipart conversion not supported yet
-			print("Warning: Multipart form data conversion not supported")
-			return
+			original_body = self.multipart_form_data
+			from_type = "multipart/form-data"
 		else:
 			# No body to convert
 			return
@@ -144,12 +143,15 @@ class RequestTree:
 		# Clear old body data
 		self.application_json = None
 		self.application_x_www_form_urlencoded = None
+		self.multipart_form_data = None
 		
 		# Set new body data
 		if self.target_content_type == "application/json":
 			self.application_json = converted_body
 		elif self.target_content_type == "application/x-www-form-urlencoded":
 			self.application_x_www_form_urlencoded = converted_body
+		elif self.target_content_type == "multipart/form-data":
+			self.multipart_form_data = converted_body
 		
 		# Update the Content-Type header
 		self.general.headers["Content-Type"] = self.target_content_type

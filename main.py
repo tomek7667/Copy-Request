@@ -19,6 +19,9 @@ from request_tree import RequestTree
 VERSION="1.0.0"
 EXT_NAME="Copy Request"
 
+# Supported languages for code generation
+SUPPORTED_LANGUAGES = ['js', 'python']
+
 
 class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 	def toString(self):
@@ -158,8 +161,8 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 			if content_type_index < 0 or content_type_index >= len(supported_types):
 				raise ValueError("Invalid content type selection")
 			
-			if language not in ['js', 'python']:
-				raise ValueError("Language must be 'js' or 'python'")
+			if language not in SUPPORTED_LANGUAGES:
+				raise ValueError("Language must be one of: " + ", ".join(SUPPORTED_LANGUAGES))
 			
 			target_content_type = supported_types[content_type_index]
 			

@@ -6,6 +6,7 @@ class ContentTypeConverter:
     Supports conversions between:
     - application/json
     - application/x-www-form-urlencoded
+    - multipart/form-data
     """
     
     @staticmethod
@@ -67,17 +68,18 @@ class ContentTypeConverter:
                 return result
             return body_data
         
+        elif content_type == "multipart/form-data":
+            # Multipart data is already in dict format from RequestTree
+            if isinstance(body_data, dict):
+                return body_data
+            return {}
+        
         return {}
     
     @staticmethod
     def _from_dict(data_dict, content_type):
         """Convert dictionary to target content type format."""
-        if content_type == "application/json":
-            return data_dict
-        
-        elif content_type == "application/x-www-form-urlencoded":
-            return data_dict
-        
+        # All formats use dict internally, actual conversion happens in parsers
         return data_dict
     
     @staticmethod
@@ -109,5 +111,6 @@ class ContentTypeConverter:
         """Return list of supported content type conversions."""
         return [
             "application/json",
-            "application/x-www-form-urlencoded"
+            "application/x-www-form-urlencoded",
+            "multipart/form-data"
         ]

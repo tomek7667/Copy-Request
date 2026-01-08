@@ -78,6 +78,7 @@ class TestContentTypeConverter(unittest.TestCase):
         self.assertIsInstance(supported, list)
         self.assertIn("application/json", supported)
         self.assertIn("application/x-www-form-urlencoded", supported)
+        self.assertIn("multipart/form-data", supported)
     
     def test_nested_json_to_urlencoded(self):
         """Test conversion with nested JSON (should flatten or handle gracefully)."""
