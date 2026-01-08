@@ -24,6 +24,14 @@ If everything succeeded, you should be able to Right-Click any **request** in bu
 -   **more** - Expandable menu with additional options:
     -   **as javascript fetch (no filtering)** - Includes all headers from the original request
     -   **as javascript fetch (custom filtering)** - Prompts you to specify which headers to exclude
+    -   **as python requests** - Python implementation with default filtering
+    -   **as python requests (no filtering)** - Python implementation with all headers
+    -   **as python requests (custom filtering)** - Python implementation with custom header filtering
+    -   **Advanced...** - Convert request to a different content-type and language
+
+## Advanced Copy Feature
+
+The **Advanced...** option converts requests between different content-types (JSON, form-urlencoded, multipart) and updates the `Content-Type` header accordingly. Enter format: `<content-type-number>,<language>` (e.g., `1,js` or `2,python`).
 
 ## Header Filtering
 

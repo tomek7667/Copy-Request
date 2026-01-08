@@ -2,14 +2,17 @@ import json
 import base64
 from java.io import PrintWriter # type: ignore
 from tree_general import TreeGeneral
+from content_type_converter import ContentTypeConverter
 
 class RequestTree:
-	def __init__(self, data, callbacks, custom_skip_headers=None, enable_header_filtering=True):
+	def __init__(self, data, callbacks, custom_skip_headers=None, enable_header_filtering=True, target_content_type=None):
 		self.callbacks = callbacks
 		self.stdout = PrintWriter(callbacks.getStdout(), True)
 		self.stderr = PrintWriter(callbacks.getStderr(), True)
 		self.general = TreeGeneral(data["request_data"], data["url"], custom_skip_headers, enable_header_filtering)
 		content_type = self.general.headers["Content-Type"] if "Content-Type" in self.general.headers else None
+		self.target_content_type = target_content_type
+		self.original_content_type = content_type
 		if content_type is not None and "multipart/form-data" in content_type:
 			content_type = "multipart/form-data"
 			self.general.headers["Content-Type"] = content_type
@@ -82,6 +85,10 @@ class RequestTree:
 		else:
 			print("Unsupported content type: " + content_type)
 
+		# Apply content-type conversion if target_content_type is specified
+		if self.target_content_type is not None and self.target_content_type != content_type:
+			self._apply_content_type_conversion()
+
 		print("loaded request tree:")
 		print(self.to_json())
 
@@ -93,16 +100,62 @@ class RequestTree:
 		while i < len(encoded):
 			c = encoded[i]
 			if c == '%':
-				url_value = int(
-					encoded[i+1:i+3],
-					16
-				)
-				result += chr(url_value)
-				i += 3
+				if i + 2 < len(encoded):
+					url_value = int(
+						encoded[i+1:i+3],
+						16
+					)
+					result += chr(url_value)
+					i += 3
+				else:
+					result += c
+					i += 1
 			else:
 				result += c
 				i += 1
 		return result
+
+
+	def _apply_content_type_conversion(self):
+		"""Convert body from original content type to target content type."""
+		# Get the current body data
+		original_body = None
+		if self.application_json is not None:
+			original_body = self.application_json
+			from_type = "application/json"
+		elif self.application_x_www_form_urlencoded is not None:
+			original_body = self.application_x_www_form_urlencoded
+			from_type = "application/x-www-form-urlencoded"
+		elif self.multipart_form_data is not None:
+			original_body = self.multipart_form_data
+			from_type = "multipart/form-data"
+		else:
+			# No body to convert
+			return
+		
+		# Convert the body
+		converted_body = ContentTypeConverter.convert(
+			original_body, 
+			from_type, 
+			self.target_content_type
+		)
+		
+		# Clear old body data
+		self.application_json = None
+		self.application_x_www_form_urlencoded = None
+		self.multipart_form_data = None
+		
+		# Set new body data
+		if self.target_content_type == "application/json":
+			self.application_json = converted_body
+		elif self.target_content_type == "application/x-www-form-urlencoded":
+			self.application_x_www_form_urlencoded = converted_body
+		elif self.target_content_type == "multipart/form-data":
+			self.multipart_form_data = converted_body
+		
+		# Update the Content-Type header
+		self.general.headers["Content-Type"] = self.target_content_type
+		print("Converted body from " + from_type + " to " + self.target_content_type)
 
 
 	def to_json(self):
