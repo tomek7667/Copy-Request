@@ -1,11 +1,11 @@
-from burp import IBurpExtender, IContextMenuFactory, IHttpRequestResponse # type: ignore
+from burp import IBurpExtender, IContextMenuFactory, IHttpRequestResponse, IExtensionStateListener # type: ignore
 from adapters.javascript_parser import JavascriptParser
 from adapters.python_parser import PythonParser
 from adapters.go_parser import GoParser
 from java.io import PrintWriter # type: ignore
 from java.util import ArrayList # type: ignore
 from javax.swing import JMenuItem, JMenu # type: ignore
-from java.awt import Toolkit # type: ignore
+from java.awt import Toolkit, Frame # type: ignore
 from java.awt.datatransfer import StringSelection # type: ignore
 from javax.swing import JOptionPane # type: ignore
 import json
@@ -21,7 +21,7 @@ VERSION="1.0.0"
 EXT_NAME="Copy Request"
 
 
-class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
+class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse, IExtensionStateListener):
 	def toString(self):
 		return EXT_NAME + " v" + VERSION
 
@@ -34,9 +34,26 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 		self.stderr = stderr
 		self.helpers = callbacks.getHelpers()
 		self.callbacks = callbacks
+		self.context = None
 		callbacks.registerContextMenuFactory(self)
+		callbacks.registerExtensionStateListener(self)
 
 		print("BurpExtender::registerExtenderCallbacks: " + self.toString() + " loaded successfully!")
+
+
+	def extensionUnloaded(self):
+		# The extension holds no background threads or long-lived message references;
+		# drop the last context menu invocation so selected messages can be collected.
+		self.context = None
+		print("BurpExtender::extensionUnloaded: " + self.toString() + " unloaded")
+
+
+	def _get_burp_frame(self):
+		"""Returns the main Burp Suite window so dialogs are parented to it."""
+		for frame in Frame.getFrames():
+			if frame.isVisible() and frame.getTitle().startswith("Burp Suite"):
+				return frame
+		return None
 
 
 	def createMenuItems(self, invocation):
@@ -71,7 +88,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 
 	def _ask_custom_headers(self):
 		custom_headers = JOptionPane.showInputDialog(
-			None,
+			self._get_burp_frame(),
 			"Enter headers to skip (comma-separated):\nExample: User-Agent,Accept,Host",
 			"Custom Header Filtering",
 			JOptionPane.PLAIN_MESSAGE
@@ -110,25 +127,11 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 		self._copy_js_with_filtering(False, None)
 
 	def copy_js_custom(self, event):
-		custom_headers = JOptionPane.showInputDialog(
-			None,
-			"Enter headers to skip (comma-separated):\nExample: User-Agent,Accept,Host",
-			"Custom Header Filtering",
-			JOptionPane.PLAIN_MESSAGE
-		)
-		if custom_headers:
-			headers_list = [h.strip() for h in custom_headers.split(',') if h.strip()]
-			self._copy_js_with_filtering(True, headers_list)
-		else:
-			self._copy_js_with_filtering(True, None)
+		self._copy_js_with_filtering(True, self._ask_custom_headers())
 
 	def _copy_js_with_filtering(self, enable_filtering, custom_skip_headers):
-		requests = self.getRequestsData()
-		request_trees = []
-		for request in requests:
-			rt = RequestTree(request, self.callbacks, custom_skip_headers, enable_filtering)
-			request_trees.append(rt)
-		JavascriptParser(request_trees, self.callbacks, custom_skip_headers, enable_filtering)
+		request_trees = self._build_request_trees(enable_filtering, custom_skip_headers)
+		self.javascriptParser = JavascriptParser(request_trees, self.callbacks, custom_skip_headers, enable_filtering)
 
 
 	def copy_python_default(self, event):
@@ -138,24 +141,10 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 		self._copy_python_with_filtering(False, None)
 
 	def copy_python_custom(self, event):
-		custom_headers = JOptionPane.showInputDialog(
-			None,
-			"Enter headers to skip (comma-separated):\nExample: User-Agent,Accept,Host",
-			"Custom Header Filtering",
-			JOptionPane.PLAIN_MESSAGE
-		)
-		if custom_headers:
-			headers_list = [h.strip() for h in custom_headers.split(',') if h.strip()]
-			self._copy_python_with_filtering(True, headers_list)
-		else:
-			self._copy_python_with_filtering(True, None)
+		self._copy_python_with_filtering(True, self._ask_custom_headers())
 
 	def _copy_python_with_filtering(self, enable_filtering, custom_skip_headers):
-		requests = self.getRequestsData()
-		request_trees = []
-		for request in requests:
-			rt = RequestTree(request, self.callbacks, custom_skip_headers, enable_filtering)
-			request_trees.append(rt)
+		request_trees = self._build_request_trees(enable_filtering, custom_skip_headers)
 		self.pythonParser = PythonParser(request_trees, self.callbacks, custom_skip_headers, enable_filtering)
 
 
