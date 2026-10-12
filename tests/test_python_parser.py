@@ -103,6 +103,26 @@ class TestPythonParser(unittest.TestCase):
         self.assertIn("json=body", clipboard_data)
         self.assertIn("Authorization", clipboard_data)
 
+    def test_post_json_python_literals(self):
+        """null/true/false in a JSON body must become None/True/False in generated Python"""
+        tree = MockRequestTree(
+            method="POST",
+            headers={"Content-Type": "application/json"},
+            body_type="json",
+            body_data={"e": None, "f": True, "g": False, "nested": {"list": [None, True, 1.5, "x"]}}
+        )
+
+        PythonParser([tree], self.callbacks, None, True)
+
+        self.assertIn('"e": None', clipboard_data)
+        self.assertIn('"f": True', clipboard_data)
+        self.assertIn('"g": False', clipboard_data)
+        self.assertNotIn(": null", clipboard_data)
+        self.assertNotIn(": true", clipboard_data)
+        self.assertNotIn(": false", clipboard_data)
+        # the generated file must be valid python
+        compile(clipboard_data, "generated.py", "exec")
+
     def test_post_form_generation(self):
         tree = MockRequestTree(
             method="POST",

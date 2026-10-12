@@ -105,7 +105,13 @@ def request_1(
     return response
 
 def main():
-    common_headers = {"Content-Type": "application/json", "Sec-Ch-Ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\"", "Sec-Ch-Ua-Platform": "\"macOS\"", "Sec-Ch-Ua-Mobile": "?0"}
+    common_headers = {
+        "Cookie": "c=123",
+        "Sec-Ch-Ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\"",
+        "Sec-Ch-Ua-Platform": "\"macOS\"",
+        "Sec-Ch-Ua-Mobile": "?0",
+        "Content-Type": "application/json"
+    }
     
     # payloads = sqli_payloads
     # payloads = xss_payloads
@@ -113,7 +119,18 @@ def main():
     
     method_1 = "POST"
     headers_1 = {}
-    body_1 = {"a": 1, "b": "abc", "c": [1, 2, 3], "d": {"test": "test"}}
+    body_1 = {
+        "a": 1,
+        "b": "abc",
+        "c": [
+            1,
+            2,
+            3
+        ],
+        "d": {
+            "test": "test"
+        }
+    }
     url_1 = {
         "domain": "jsonplaceholder.typicode.com",
         "protocol": "https",
@@ -121,7 +138,9 @@ def main():
         "path": "/todos",
         "parameters": {},
     }
-    cookies_1 = {"c": "123"}
+    cookies_1 = {
+        "c": "123"
+    }
     res_1 = request_1(
         url_1,
         method_1,

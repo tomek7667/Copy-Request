@@ -1,6 +1,12 @@
 const fs = require("fs");
 
-const constructUrl = ({ parameters, path, protocol, domain, port }) => {
+const constructUrl = ({
+	parameters,
+	path,
+	protocol,
+	domain,
+	port,
+}) => {
 	const urlSearchParams = new URLSearchParams();
 	for (const key in parameters) {
 		const value = parameters[key];
@@ -12,7 +18,7 @@ const constructUrl = ({ parameters, path, protocol, domain, port }) => {
 	} else {
 		return `${protocol}://${domain}:${port}${path}?${parametersStr}`;
 	}
-};
+}
 
 const constructCookies = (cookieObject) => {
 	const cookiesArr = [];
@@ -22,7 +28,7 @@ const constructCookies = (cookieObject) => {
 	}
 	const stringifiedCookies = cookiesArr.join("; ");
 	return stringifiedCookies;
-};
+}
 
 const constructXWwwFormUrlencoded = (bodyObject) => {
 	const formBody = [];
@@ -34,7 +40,7 @@ const constructXWwwFormUrlencoded = (bodyObject) => {
 	}
 	const stringifiedBody = formBody.join("&");
 	return stringifiedBody;
-};
+}
 
 const request_1 = async (
 	urlObject,
@@ -44,27 +50,34 @@ const request_1 = async (
 	authorization,
 	body,
 	files,
-	commonHeaders
+	commonHeaders,
 ) => {
 	const url = constructUrl(urlObject);
-
-	const response = await fetch(url, {
-		method,
-		headers: {
-			...commonHeaders,
-			...headers,
-		},
-	});
+	const stringifiedCookies = constructCookies(cookies);
+	
+	const response = await fetch(
+		url,
+		{
+			method,
+			headers: {
+				...commonHeaders,
+				...headers,
+				Cookie: stringifiedCookies,
+			}
+		}
+	);
 	// const data = await response.json();
 	const data = await response.text();
 	return data;
-};
+}
+
 
 const main = async () => {
 	const commonHeaders = {
-		"Sec-Ch-Ua": '"Not)A;Brand";v="8", "Chromium";v="138"',
-		"Sec-Ch-Ua-Platform": '"macOS"',
-		"Sec-Ch-Ua-Mobile": "?0",
+		"Cookie": "c=123",
+		"Sec-Ch-Ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\"",
+		"Sec-Ch-Ua-Platform": "\"macOS\"",
+		"Sec-Ch-Ua-Mobile": "?0"
 	};
 	// const wordlist = fs.readFilesync("rockyou.txt", "utf-8").split("\n")
 	// const len = wordlist.length;
@@ -72,26 +85,22 @@ const main = async () => {
 	const method_1 = "GET";
 	const headers_1 = {};
 	const url_1 = {
-		path: "/",
-		protocol: "https",
-		port: 443,
-		domain: "example.com",
-		parameters: {},
+		"parameters": {
+			"userId": "1"
+		},
+		"path": "/todos/1",
+		"protocol": "https",
+		"domain": "jsonplaceholder.typicode.com",
+		"port": 443
 	};
-	const res_1 = await request_1(
-		url_1,
-		method_1,
-		headers_1,
-		undefined,
-		undefined,
-		undefined,
-		undefined,
-		commonHeaders
-	);
+	const cookies_1 = {
+		"c": "123"
+	};
+	const res_1 = await request_1(url_1, method_1, headers_1, cookies_1, undefined, undefined, undefined, commonHeaders);
 	// console.log(res_1);
 	// }
-};
+}
 
 (async () => {
-	await main();
+	await main()
 })();

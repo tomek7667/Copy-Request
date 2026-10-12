@@ -32,6 +32,8 @@ if __name__ == '__main__':
         'test_tree_general.py', 
         'test_request_tree.py',
         'test_javascript_parser.py',
+        'test_python_parser.py',
+        'test_go_parser.py',
         'test_integration.py'
     ]
     

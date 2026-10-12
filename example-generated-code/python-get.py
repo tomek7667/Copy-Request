@@ -87,7 +87,10 @@ def request_1(
     proxies=None,
 ):
     url = construct_url(url_object)
+    stringified_cookies = construct_cookies(cookies) if cookies else ""
     h = {**common_headers, **headers}
+    if cookies:
+        h["Cookie"] = stringified_cookies
     
     response = requests.request(
         url=url,
@@ -101,7 +104,12 @@ def request_1(
     return response
 
 def main():
-    common_headers = {"Sec-Ch-Ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\"", "Sec-Ch-Ua-Platform": "\"macOS\"", "Sec-Ch-Ua-Mobile": "?0"}
+    common_headers = {
+        "Cookie": "c=123",
+        "Sec-Ch-Ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\"",
+        "Sec-Ch-Ua-Platform": "\"macOS\"",
+        "Sec-Ch-Ua-Mobile": "?0"
+    }
     
     # payloads = sqli_payloads
     # payloads = xss_payloads
@@ -110,17 +118,22 @@ def main():
     method_1 = "GET"
     headers_1 = {}
     url_1 = {
-        "domain": "example.com",
+        "domain": "jsonplaceholder.typicode.com",
         "protocol": "https",
         "port": 443,
-        "path": "/",
-        "parameters": {},
+        "path": "/todos/1",
+        "parameters": {
+            "userId": "1"
+        },
+    }
+    cookies_1 = {
+        "c": "123"
     }
     res_1 = request_1(
         url_1,
         method_1,
         headers_1,
-        None,
+        cookies_1,
         None,
         None,
         None,

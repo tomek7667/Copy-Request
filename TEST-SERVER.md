@@ -1,6 +1,6 @@
 # Test Server
 
-Quick server to test your generated JavaScript requests.
+Quick server to test your generated JavaScript, Python or Go requests.
 
 ## Setup
 
@@ -13,7 +13,7 @@ Server runs on `http://localhost:3001` and shows all available routes on startup
 
 ## Usage
 
-1. Generate JS code with Copy-Request extension
+1. Generate JS, Python or Go code with Copy-Request extension
 2. Change the URL in your code to `localhost:3001/whatever`
 3. Run your code
 4. Check the server console - it logs everything nicely with colors

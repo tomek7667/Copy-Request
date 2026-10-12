@@ -19,11 +19,14 @@ The extension is currently in development so only manual installation is possibl
 
 If everything succeeded, you should be able to Right-Click any **request** in burp and see `Extensions > Copy Request` with the following options:
 
--   **as javascript fetch** - Default option with recommended header filtering
--   **as python requests (Not yet)** - Python implementation (coming soon)
--   **more** - Expandable menu with additional options:
-    -   **as javascript fetch (no filtering)** - Includes all headers from the original request
-    -   **as javascript fetch (custom filtering)** - Prompts you to specify which headers to exclude
+-   **as javascript fetch** - JavaScript `fetch` implementation with recommended header filtering
+-   **as python requests** - Python `requests` implementation with recommended header filtering
+-   **as go net/http** - Go `net/http` implementation with recommended header filtering
+-   **more...** - Expandable menu with additional options for every language:
+    -   **(no filtering)** - Includes all headers from the original request
+    -   **(custom filtering)** - Prompts you to specify which headers to exclude
+
+Selecting multiple requests at once generates one function per request plus a shared `commonHeaders` object holding the headers all of them have in common.
 
 ## Header Filtering
 
@@ -39,9 +42,18 @@ If you have any issues installing/using the extension, please open a new issue a
 
 ## Supported languages
 
--   [x] JS
--   [ ] Python
--   [ ] Go
+-   [x] JS (`fetch`)
+-   [x] Python (`requests`)
+-   [x] Go (`net/http`, standard library only)
+
+### Generated Go code
+
+The Go output is a single `main.go` using only the standard library, so it can be run directly with `go run main.go`. It is `gofmt`-clean and includes:
+
+-   `UrlObject` / `FileObject` structs and one `request_N` function per copied request
+-   JSON bodies as `map[string]interface{}`, form bodies as `map[string]string`, multipart bodies built with `mime/multipart` (files are embedded as base64, with a commented `fileToBase64("<path>")` alternative)
+-   A pre-configured `http.Client` that does not follow redirects, with `PROXY_URL` (e.g. to route through Burp), `INSECURE_SKIP_VERIFY` and `REQUEST_TIMEOUT` constants
+-   `readWordlist` and `executeParallelRequests` helpers plus a commented wordlist loop in `main`
 
 ## Roadmap
 
@@ -58,12 +70,29 @@ If you have any issues installing/using the extension, please open a new issue a
     -   [x] Some unit tests that verify the parsing process with different scenarios
     -   [x] CI pipeline that runs the unit tests.
     -   [x] Add optional headers filtering
--   Python/Go
-    -   [ ] Same roadmap as for JS. Will be filled when JS roadmap is finished.
+-   Python
+    -   [x] Copied request is a separate function that is called in main function
+    -   [x] POST request with Content-Type: `application/json`
+    -   [x] Variable'ized cookie, url and body of a request
+    -   [x] POST request with Content-Type `application/x-www-form-urlencoded`
+    -   [x] POST request with Content-Type `multipart/form-data` with files passed to `requests`
+    -   [x] Commented generated code with a parallel request helper
+    -   [x] Some unit tests that verify the parsing process with different scenarios
+    -   [x] Add optional headers filtering
+-   Go
+    -   [x] Copied request is a separate function that is called in main function
+    -   [x] POST request with Content-Type: `application/json`
+    -   [x] Variable'ized cookie, url and body of a request
+    -   [x] POST request with Content-Type `application/x-www-form-urlencoded`
+    -   [x] POST request with Content-Type `multipart/form-data` via `mime/multipart`, files from base64 or `fileToBase64("<path_to_file>")`
+    -   [x] Commented generated code, commented loop with the request over a wordlist loaded from a file, goroutine based parallel helper
+    -   [x] Unit tests that verify the generated code with `gofmt` and `go vet`
+    -   [x] CI pipeline that runs the unit tests with a Go toolchain
+    -   [x] Add optional headers filtering
 
 ## Test Server
 
-A comprehensive test server is included to test and log requests made by your generated JavaScript code:
+A comprehensive test server is included to test and log requests made by your generated JavaScript, Python or Go code:
 
 1. Install dependencies: `npm install`
 2. Start the server: `npm start`

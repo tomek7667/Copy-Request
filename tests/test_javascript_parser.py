@@ -129,6 +129,9 @@ class TestJavascriptParser(unittest.TestCase):
         
         self.assertIn("new FormData()", clipboard_data)
         self.assertIn("atob(file[\"data\"])", clipboard_data)
+        # the multipart request function must return the response data like the other variants
+        function_code = clipboard_data.split("const request_1 = async (")[1].split("\n}\n")[0]
+        self.assertIn("return data;", function_code)
 
 if __name__ == '__main__':
     unittest.main()

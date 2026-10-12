@@ -63,7 +63,7 @@ class JavascriptParser(Parser):
 		self.common_headers = self._get_common_headers()
 		self._filter_common_headers()
 		self.main = "const main = async () => {\n"
-		self.main += "\tconst commonHeaders = " + json.dumps(self.common_headers) + ";"
+		self.main += "\tconst commonHeaders = " + self.stringify(self.common_headers, 1, "\t") + ";"
 		self.main +="""
 	// const wordlist = fs.readFilesync("rockyou.txt", "utf-8").split("\\n")
 	// const len = wordlist.length;
@@ -72,19 +72,19 @@ class JavascriptParser(Parser):
 			_i = str(i + 1)
 			[_, method, headers, body, url, cookies, authorization, files] = self.functions[i]
 			self.main += "\tconst method_" + _i + " = \"" + method + "\";\n"
-			self.main += "\tconst headers_" + _i  + " = " + json.dumps(headers) + ";\n"
+			self.main += "\tconst headers_" + _i  + " = " + self.stringify(headers, 1, "\t") + ";\n"
 			if body is not None:
-				self.main += "\tconst body_" + _i + " = " + json.dumps(body) + ";\n"
-			self.main += "\tconst url_" + _i + " = " + json.dumps(url) + ";\n"
+				self.main += "\tconst body_" + _i + " = " + self.stringify(body, 1, "\t") + ";\n"
+			self.main += "\tconst url_" + _i + " = " + self.stringify(url, 1, "\t") + ";\n"
 			if cookies is not None:
-				self.main += "\tconst cookies_" + _i + " = " + json.dumps(cookies) + ";\n"
+				self.main += "\tconst cookies_" + _i + " = " + self.stringify(cookies, 1, "\t") + ";\n"
 			if authorization is not None:
 				self.main += "\tconst authorization_" + _i + " = \"" + authorization + "\";\n"
 			if files is not None:
 				for j in range(len(files)):
 					_j = str(j + 1)
 					self.main += "\t// const data_" + _j + " = btoa(fs.readFileSync(\"" + files[j]["filename"] + "\", \"utf-8\"));\n"
-					self.main += "\tconst file_" + _j + " = " + json.dumps(files[j]) + ";\n"
+					self.main += "\tconst file_" + _j + " = " + self.stringify(files[j], 1, "\t") + ";\n"
 				self.main += "\tconst files_" + _i + " = ["
 				files_variables = ", ".join(["file_" + str(j + 1) for j in range(len(files))])
 				self.main += files_variables + "];\n"
@@ -222,6 +222,7 @@ class JavascriptParser(Parser):
 			code += "\t// const data = await response.text();\n"
 			code += "\t// const buffer = await response.arrayBuffer();\n"
 			code += "\t// fs.writeFileSync(\"file_" + str(i) + "\", buffer);\n"
+			code += "\treturn data;\n"
 		elif request_tree.application_json is not None:
 			code += "\t\t\tbody: JSON.stringify(body),\n"
 			code += "\t\t\theaders: {\n"
@@ -288,6 +289,4 @@ class JavascriptParser(Parser):
 			return request_tree.multipart_form_data
 		else:
 			return None
-	
-	# TODO: Create stringify method that will json.dumps with correct indentation. can be done in u_parser.py
 

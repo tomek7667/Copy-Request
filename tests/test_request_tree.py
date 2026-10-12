@@ -86,5 +86,58 @@ class TestRequestTree(unittest.TestCase):
         self.assertEqual(tree.application_x_www_form_urlencoded["key1"], "value1")
         self.assertEqual(tree.application_x_www_form_urlencoded["key2"], "value 2")
 
+    def _multipart_request(self, parts):
+        boundary = "----WebKitFormBoundaryTEST"
+        lines = []
+        for part in parts:
+            lines.append("--" + boundary)
+            lines.extend(part)
+        lines.append("--" + boundary + "--")
+        lines.append("")
+        body = "\n".join(lines)
+        return {
+            "request_data": "POST /upload HTTP/1.1\nHost: example.com\nContent-Type: multipart/form-data; boundary=" + boundary + "\n\n" + body,
+            "url": MockURL("https://example.com/upload")
+        }
+
+    def test_multipart_parsing_fields_and_files(self):
+        import base64
+        data = self._multipart_request([
+            ['Content-Disposition: form-data; name="title"', "", "my upload"],
+            # a field literally named "file" must not be mistaken for a file upload
+            ['Content-Disposition: form-data; name="file"', "", "not a file"],
+            ['Content-Disposition: form-data; name="attachment"; filename="notes.txt"', "Content-Type: text/plain", "", "hello world"],
+        ])
+        tree = RequestTree(data, self.callbacks)
+
+        self.assertEqual(tree.general.headers["Content-Type"], "multipart/form-data")
+        self.assertEqual(tree.multipart_form_data, {"title": "my upload", "file": "not a file"})
+        self.assertEqual(len(tree.files), 1)
+        self.assertEqual(tree.files[0]["for"], "attachment")
+        self.assertEqual(tree.files[0]["filename"], "notes.txt")
+        self.assertEqual(tree.files[0]["contentType"], "text/plain")
+        self.assertEqual(base64.b64decode(tree.files[0]["data"]).decode(), "hello world")
+
+    def test_multipart_parsing_multiline_values(self):
+        import base64
+        data = self._multipart_request([
+            ['Content-Disposition: form-data; name="text"', "", "line 1", "", "line 3"],
+            ['Content-Disposition: form-data; name="f"; filename="a.csv"', "Content-Type: text/csv", "", "a,b", "1,2", ""],
+        ])
+        tree = RequestTree(data, self.callbacks)
+
+        self.assertEqual(tree.multipart_form_data["text"], "line 1\n\nline 3")
+        # trailing newline inside the file content is preserved
+        self.assertEqual(base64.b64decode(tree.files[0]["data"]).decode(), "a,b\n1,2\n")
+
+    def test_multipart_file_without_content_type(self):
+        data = self._multipart_request([
+            ['Content-Disposition: form-data; name="f"; filename="blob.bin"', "", "xyz"],
+        ])
+        tree = RequestTree(data, self.callbacks)
+
+        self.assertEqual(tree.files[0]["contentType"], "application/octet-stream")
+        self.assertEqual(tree.multipart_form_data, {})
+
 if __name__ == '__main__':
     unittest.main()

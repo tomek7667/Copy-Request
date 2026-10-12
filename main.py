@@ -1,6 +1,7 @@
 from burp import IBurpExtender, IContextMenuFactory, IHttpRequestResponse # type: ignore
 from adapters.javascript_parser import JavascriptParser
 from adapters.python_parser import PythonParser
+from adapters.go_parser import GoParser
 from java.io import PrintWriter # type: ignore
 from java.util import ArrayList # type: ignore
 from javax.swing import JMenuItem, JMenu # type: ignore
@@ -44,22 +45,63 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
 
 		menu_list.add(JMenuItem("as javascript fetch",
 				actionPerformed=self.copy_js_default))
-		
+		menu_list.add(JMenuItem("as python requests",
+				actionPerformed=self.copy_python_default))
+		menu_list.add(JMenuItem("as go net/http",
+				actionPerformed=self.copy_go_default))
+
 		advanced_menu = JMenu("more...")
 		advanced_menu.add(JMenuItem("as javascript fetch (no filtering)",
 				actionPerformed=self.copy_js_no_filter))
 		advanced_menu.add(JMenuItem("as javascript fetch (custom filtering)",
 				actionPerformed=self.copy_js_custom))
-		advanced_menu.add(JMenuItem("as python requests",
-				actionPerformed=self.copy_python_default))
 		advanced_menu.add(JMenuItem("as python requests (no filtering)",
 				actionPerformed=self.copy_python_no_filter))
 		advanced_menu.add(JMenuItem("as python requests (custom filtering)",
 				actionPerformed=self.copy_python_custom))
-		
+		advanced_menu.add(JMenuItem("as go net/http (no filtering)",
+				actionPerformed=self.copy_go_no_filter))
+		advanced_menu.add(JMenuItem("as go net/http (custom filtering)",
+				actionPerformed=self.copy_go_custom))
+
 		menu_list.add(advanced_menu)
 
 		return menu_list
+
+
+	def _ask_custom_headers(self):
+		custom_headers = JOptionPane.showInputDialog(
+			None,
+			"Enter headers to skip (comma-separated):\nExample: User-Agent,Accept,Host",
+			"Custom Header Filtering",
+			JOptionPane.PLAIN_MESSAGE
+		)
+		if custom_headers:
+			return [h.strip() for h in custom_headers.split(',') if h.strip()]
+		return None
+
+
+	def _build_request_trees(self, enable_filtering, custom_skip_headers):
+		requests = self.getRequestsData()
+		request_trees = []
+		for request in requests:
+			rt = RequestTree(request, self.callbacks, custom_skip_headers, enable_filtering)
+			request_trees.append(rt)
+		return request_trees
+
+
+	def copy_go_default(self, event):
+		self._copy_go_with_filtering(True, None)
+
+	def copy_go_no_filter(self, event):
+		self._copy_go_with_filtering(False, None)
+
+	def copy_go_custom(self, event):
+		self._copy_go_with_filtering(True, self._ask_custom_headers())
+
+	def _copy_go_with_filtering(self, enable_filtering, custom_skip_headers):
+		request_trees = self._build_request_trees(enable_filtering, custom_skip_headers)
+		self.goParser = GoParser(request_trees, self.callbacks, custom_skip_headers, enable_filtering)
 
 	def copy_js_default(self, event):
 		self._copy_js_with_filtering(True, None)

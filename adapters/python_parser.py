@@ -2,7 +2,7 @@ import json
 import hashlib
 from java.io import PrintWriter # type: ignore
 from request_tree import RequestTree
-from u_parser import Parser
+from u_parser import Parser, PYTHON_LITERALS
 
 IMPORTS = """import requests
 import urllib.parse
@@ -82,6 +82,11 @@ reverse_shell_payloads = [
 """
 
 class PythonParser(Parser):
+	def stringify(self, obj, indent_level=1, indent_str="    ", literals=PYTHON_LITERALS):
+		"""Python literals: None/True/False instead of null/true/false."""
+		return Parser.stringify(self, obj, indent_level, indent_str, literals)
+
+
 	def __init__(self, request_trees, callbacks, custom_skip_headers=None, enable_header_filtering=True):
 		self.callbacks = callbacks
 		self.stdout = PrintWriter(callbacks.getStdout(), True)
@@ -91,7 +96,7 @@ class PythonParser(Parser):
 		self.common_headers = self._get_common_headers()
 		self._filter_common_headers()
 		self.main = """def main():
-    common_headers = """ + json.dumps(self.common_headers) + """
+    common_headers = """ + self.stringify(self.common_headers, 1, "    ") + """
     
     # payloads = sqli_payloads
     # payloads = xss_payloads
@@ -102,25 +107,25 @@ class PythonParser(Parser):
 			_i = str(i + 1)
 			[_, method, headers, body, url, cookies, authorization, files] = self.functions[i]
 			self.main += "    method_" + _i + " = \"" + method + "\"\n"
-			self.main += "    headers_" + _i + " = " + json.dumps(headers) + "\n"
+			self.main += "    headers_" + _i + " = " + self.stringify(headers, 1, "    ") + "\n"
 			if body is not None:
-				self.main += "    body_" + _i + " = " + json.dumps(body) + "\n"
+				self.main += "    body_" + _i + " = " + self.stringify(body, 1, "    ") + "\n"
 			self.main += "    url_" + _i + " = {\n"
 			self.main += "        \"domain\": \"" + url["domain"] + "\",\n"
 			self.main += "        \"protocol\": \"" + url["protocol"] + "\",\n"
 			self.main += "        \"port\": " + str(url["port"]) + ",\n"
 			self.main += "        \"path\": \"" + url["path"] + "\",\n"
-			self.main += "        \"parameters\": " + json.dumps(url["parameters"]) + ",\n"
+			self.main += "        \"parameters\": " + self.stringify(url["parameters"], 2, "    ") + ",\n"
 			self.main += "    }\n"
 			if cookies is not None:
-				self.main += "    cookies_" + _i + " = " + json.dumps(cookies) + "\n"
+				self.main += "    cookies_" + _i + " = " + self.stringify(cookies, 1, "    ") + "\n"
 			if authorization is not None:
 				self.main += "    authorization_" + _i + " = \"" + authorization + "\"\n"
 			if files is not None:
 				for j in range(len(files)):
 					_j = str(j + 1)
 					self.main += "    # data_" + _j + " = base64.b64encode(open(\"" + files[j]["filename"] + "\", \"rb\").read()).decode()\n"
-					self.main += "    file_" + _j + " = " + json.dumps(files[j]) + "\n"
+					self.main += "    file_" + _j + " = " + self.stringify(files[j], 1, "    ") + "\n"
 				self.main += "    files_" + _i + " = ["
 				files_variables = ", ".join(["file_" + str(j + 1) for j in range(len(files))])
 				self.main += files_variables + "]\n"

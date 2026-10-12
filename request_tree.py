@@ -58,32 +58,79 @@ class RequestTree:
 			)
 			splitter = data.split("\n")[0]
 			for item in data.split(splitter)[1:-1]:
-				param_name = item.split('Content-Disposition: form-data; name="')[1].split('"')[0]
-				if "filename" in item.split(param_name)[1]:
-					_file_content_type = item.split("Content-Type: ")[1].split("\n")[0]
-					_file_name = item.split(param_name)[1].split('filename="')[1].split('"')[0]
-					value = "\n".join(
-						item.split("\n")[4:-2]
-					)
-					_file = {
-						"for": param_name,
-						"filename": _file_name,
-						"contentType": _file_content_type,
+				part = self._parse_multipart_part(item)
+				if part is None:
+					continue
+				if part["filename"] is not None:
+					self.files.append({
+						"for": part["name"],
+						"filename": part["filename"],
+						"contentType": part["contentType"],
 						"data": base64.b64encode(
-							value.encode("utf-8"),
+							part["body"].encode("utf-8"),
 						).decode()
-					}
-					self.files.append(_file)
+					})
 				else:
-					value = "\n".join(
-						item.split("\n")[3:-1]
-					)
-					self.multipart_form_data[param_name] = value
+					self.multipart_form_data[part["name"]] = part["body"]
 		else:
 			print("Unsupported content type: " + content_type)
 
 		print("loaded request tree:")
 		print(self.to_json())
+
+
+	def _parse_multipart_part(self, item):
+		"""Parses a single multipart part (the text between two boundary lines).
+
+		`item` looks like "\\n<header lines>\\n\\n<body>\\n". Returns a dict with
+		name, filename (None for plain fields), contentType and body, or None when
+		the part has no Content-Disposition header.
+		"""
+		if item.startswith("\n"):
+			item = item[1:]
+		if "\n\n" in item:
+			headers_raw, body = item.split("\n\n", 1)
+		else:
+			headers_raw, body = item, ""
+		# A single newline precedes the next boundary and is not part of the body
+		if body.endswith("\n"):
+			body = body[:-1]
+
+		name = None
+		filename = None
+		content_type = None
+		for header_line in headers_raw.split("\n"):
+			if ":" not in header_line:
+				continue
+			header_name, header_value = header_line.split(":", 1)
+			header_name = header_name.strip().lower()
+			header_value = header_value.strip()
+			if header_name == "content-disposition":
+				for directive in header_value.split(";"):
+					directive = directive.strip()
+					if "=" not in directive:
+						continue
+					key, value = directive.split("=", 1)
+					key = key.strip().lower()
+					value = value.strip()
+					if len(value) >= 2 and value[0] == '"' and value[-1] == '"':
+						value = value[1:-1]
+					if key == "name":
+						name = value
+					elif key == "filename":
+						filename = value
+			elif header_name == "content-type":
+				content_type = header_value
+		if name is None:
+			return None
+		if filename is not None and content_type is None:
+			content_type = "application/octet-stream"
+		return {
+			"name": name,
+			"filename": filename,
+			"contentType": content_type,
+			"body": body
+		}
 
 
 	def _url_decode(self, s):
